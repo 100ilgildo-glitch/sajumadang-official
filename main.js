@@ -450,12 +450,3 @@ function debounce(func, wait) {
     };
 }
 
-emailjs.send(
-    serviceID,
-    templateID,
-    {
-        name: formData.name,
-        email: formData.email,
-        tel: formData.tel
-    }
-)
