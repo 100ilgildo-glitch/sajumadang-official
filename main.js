@@ -180,7 +180,7 @@ function initForm() {
     });
 
     // Phone number formatting
-    const phoneInput = document.getElementById('phone');
+    const phoneInput = document.getElementById('tel');
     if (phoneInput) {
         phoneInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^\d]/g, '');
@@ -243,7 +243,7 @@ function initForm() {
             }
 
             // Validate phone number
-            const phone = document.getElementById('phone').value;
+            const phone = document.getElementById('tel').value;
             const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
             if (!phonePattern.test(phone)) {
                 alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
@@ -251,38 +251,46 @@ function initForm() {
             }
 
             // Collect form data
-            const formData = collectFormData();
-            
-            // Show success modal
-            showSuccessModal(formData);
-            
-            // Reset form
-            form.reset();
-            calculateTotal();
-        });
-    }
+const formData = collectFormData();
 
-    // Initial calculation
+fetch("https://script.google.com/macros/s/AKfycbw_fkb-c11S_xOqnl0SY1tULevr_FW52TadW--KrHGwa7KTfKkK2PEm7x-CPaak36mg/exec", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        services: formData.services.join(", "),
+        name1: formData.person1.name,
+        gender1: formData.person1.gender,
+        birthDate1: formData.person1.birthDate,
+        birthTime1: formData.person1.birthTime,
+
+        name2: formData.person2 ? formData.person2.name : "",
+        gender2: formData.person2 ? formData.person2.gender : "",
+        birthDate2: formData.person2 ? formData.person2.birthDate : "",
+        birthTime2: formData.person2 ? formData.person2.birthTime : "",
+
+        tel: formData.contact.phone,
+        email: formData.contact.email,
+        additionalQuestions: formData.additionalQuestions
+    })
+})
+.then(response => response.json())
+.then(data => {
+
+    showSuccessModal(formData);
+
+    form.reset();
     calculateTotal();
-}
 
-function collectFormData() {
-    const data = {
-        services: [],
-        totalPrice: document.getElementById('totalPrice').textContent,
-        person1: {
-            name: document.getElementById('name1').value,
-            gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date1').value,
-            birthTime: document.getElementById('time_unknown1').checked ? '시간 미상' : (document.getElementById('birth_time1').value || '미입력')
-        },
-        contact: {
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value
-        },
-        additionalQuestions: document.getElementById('additional_questions').value || '없음'
-    };
+})
+.catch(error => {
+
+    alert("상담신청 저장에 실패했습니다.");
+
+    console.error(error);
+
+});
 
     // Collect selected services
     const serviceMapping = {
