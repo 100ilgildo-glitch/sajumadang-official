@@ -426,7 +426,7 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}년 ${month}월 ${day}일`;
+    return `${year}년 ${month}월 ${day}일`; 
 }
 
 // Debounce function for performance
@@ -440,4 +440,48 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+function doPost(e) {
+  try {
+    // 🔗 진짜 연결고리: 사장님의 진짜 시트 이름 "사주마당 상담서비스 신청"으로 딱 고정합니다!
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("사주마당 상담서비스 신청");
+    
+    // 만약 시트 이름을 못 찾으면 첫 번째 시트라도 강제로 가져오는 안전장치
+    if (!sheet) {
+      sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    }
+    
+    // HTML에서 보낸 한글 주머니 데이터를 풀어줍니다.
+    var data = JSON.parse(e.postData.contents);
+    
+    // 사장님의 구글 시트 열 순서(A열부터 Q열까지)에 한치의 오차도 없이 일치시켜 적습니다.
+    sheet.appendRow([
+      data["접수일"],       // A열
+      data["상담신청서1"],   // B열
+      data["이름1"],       // C열
+      data["성별1"],       // D열
+      data["생년월일1"],    // E열
+      data["시간1"],       // F열
+      data["양력/음력1"],    // G열
+      data["상담신청서2"],   // H열
+      data["이름2"],       // I열
+      data["성별2"],       // J열
+      data["생년월일2"],    // K열
+      data["시간2"],       // L열
+      data["양력/음력2"],    // M열
+      data["합계금액"],     // N열
+      data["전화번호"],     // O열
+      data["이메일"],       // P열
+      data["비고"]         // Q열
+    ]);
+    
+    // 전송 성공 신호 반환
+    return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
+                         .setMimeType(ContentService.MimeType.JSON);
+                         
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({"result": "error", "message": error.toString()}))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
 }
