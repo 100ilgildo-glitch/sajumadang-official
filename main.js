@@ -180,7 +180,7 @@ function initForm() {
     });
 
     // Phone number formatting
-    const phoneInput = document.getElementById('tel');
+    const phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function(e) {
             let value = e.target.value.replace(/[^\d]/g, '');
@@ -243,7 +243,7 @@ function initForm() {
             }
 
             // Validate phone number
-            const phone = document.getElementById('tel').value;
+            const phone = document.getElementById('phone').value;
             const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
             if (!phonePattern.test(phone)) {
                 alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
@@ -251,48 +251,21 @@ function initForm() {
             }
 
             // Collect form data
-const formData = collectFormData();
+            const formData = collectFormData();
+            
+            // Show success modal
+            showSuccessModal(formData);
+            
+            // Reset form
+            form.reset();
+            calculateTotal();
+        });
+    }
 
-fetch("https://script.google.com/macros/s/AKfycbw_fkb-c11S_xOqnl0SY1tULevr_FW52TadW--KrHGwa7KTfKkK2PEm7x-CPaak36mg/exec", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-        services: formData.services.join(", "),
-        name1: formData.person1.name,
-        gender1: formData.person1.gender,
-        birthDate1: formData.person1.birthDate,
-        birthTime1: formData.person1.birthTime,
-
-        name2: formData.person2 ? formData.person2.name : "",
-        gender2: formData.person2 ? formData.person2.gender : "",
-        birthDate2: formData.person2 ? formData.person2.birthDate : "",
-        birthTime2: formData.person2 ? formData.person2.birthTime : "",
-
-        tel: formData.contact.phone,
-        email: formData.contact.email,
-        additionalQuestions: formData.additionalQuestions
-    })
-})
-.then(response => response.json())
-.then(data => {
-
-    showSuccessModal(formData);
-
-    form.reset();
+    // Initial calculation
     calculateTotal();
+}
 
-})
-.catch(error => {
-
-    alert("상담신청 저장에 실패했습니다.");
-
-    console.error(error);
-
-});
-
-    
 function collectFormData() {
     const data = {
         services: [],
@@ -310,7 +283,6 @@ function collectFormData() {
         },
         additionalQuestions: document.getElementById('additional_questions').value || '없음'
     };
-
 
     // Collect selected services
     const serviceMapping = {
@@ -469,4 +441,3 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
-
