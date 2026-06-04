@@ -292,6 +292,26 @@ fetch("https://script.google.com/macros/s/AKfycbw_fkb-c11S_xOqnl0SY1tULevr_FW52T
 
 });
 
+    
+function collectFormData() {
+    const data = {
+        services: [],
+        totalPrice: document.getElementById('totalPrice').textContent,
+        person1: {
+            name: document.getElementById('name1').value,
+            gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
+            birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
+            birthDate: document.getElementById('birth_date1').value,
+            birthTime: document.getElementById('time_unknown1').checked ? '시간 미상' : (document.getElementById('birth_time1').value || '미입력')
+        },
+        contact: {
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value
+        },
+        additionalQuestions: document.getElementById('additional_questions').value || '없음'
+    };
+
+
     // Collect selected services
     const serviceMapping = {
         'service_lifelong': '평생사주',
