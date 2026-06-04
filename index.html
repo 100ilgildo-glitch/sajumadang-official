@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" translate="no">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <meta name="description" content="정통 명리학 전문인과 함께하는 평생사주, 신년운, 재물운, 건강운, 직업운, 궁합 상담 서비스">
 
     <!-- 🔍 여기에 구글 인증 코드가 완벽하게 들어갔습니다! -->
-    <meta name="google-site-verification" content="google17294bc19fa2189a" />
+    <meta name="google-site-verification" content="google17294bc19fa2189a">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,7 +63,7 @@
                     <a href="https://www.youtube.com/shorts/AgQaGt2y9Vs" target="_blank" class="btn btn-primary">
                         <i class="fas fa-edit"></i> 동영상
                     </a>
-                <div class="hero-buttons animate-fade-in-delay-2">
+                    <div class="hero-buttons animate-fade-in-delay-2">
                     <a href="#application" class="btn btn-primary">
                         <i class="fas fa-edit"></i> 상담 신청하기
                     </a>
@@ -815,9 +815,6 @@
         </div>
     </div>
 
-    <!-- Custom JavaScript -->
-    <script src="main.js"></script>
-
     <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
@@ -862,19 +859,23 @@
 
     </script>
 
-    <!-- 🚨 [최종 수리본] 오타 수정 및 번역기 버그 차단 통합 스크립트 -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var form = document.querySelector('.application-form') || document.querySelector('form');
             if (!form) return;
 
             form.addEventListener('submit', function (e) {
-                // [1] 라디오 버튼 1번부터 6번까지 (s1 ~ s6) 값을 순서대로 배달
+                e.preventDefault(); // 1단계: 구글 시트와 메일이 다 가기 전까지 새로고침 강제 차단!
+
+                // --------------------------------------------------
+                // [1] 라디오 버튼 s1 ~ s6 데이터 수집 (Coupang/Couter 등 선택 서비스)
+                // --------------------------------------------------
                 var radioGroups = [];
                 document.querySelectorAll('input[type="radio"]').forEach(function (rd) {
                     if (!radioGroups.includes(rd.name)) radioGroups.push(rd.name);
                 });
 
+                var servicesTextList = [];
                 for (var i = 0; i < 6; i++) {
                     var inputS = document.createElement('input');
                     inputS.type = 'hidden';
@@ -884,7 +885,9 @@
                         var checkedRadio = document.querySelector('input[name="' + radioGroups[i] + '"]:checked');
                         if (checkedRadio) {
                             var labelText = checkedRadio.closest('label')?.innerText || checkedRadio.parentElement?.innerText || checkedRadio.value || "";
-                            inputS.value = labelText.replace(/[\n\r]/g, '').trim();
+                            var finalVal = labelText.replace(/[\n\r]/g, '').trim();
+                            inputS.value = finalVal;
+                            servicesTextList.push(finalVal);
                         } else {
                             inputS.value = "선택 안 함";
                         }
@@ -894,99 +897,60 @@
                     form.appendChild(inputS);
                 }
 
-                // [2] 최종 합계 금액을 {{price}} 주머니에 배달
+                // --------------------------------------------------
+                // [2] 최종 합계 금액 수집
+                // --------------------------------------------------
                 var priceElement = document.querySelector('.total-price-display') || document.getElementById('total-price-display') || { innerText: "0원" };
+                var finalPrice = priceElement.innerText.trim();
+
                 var inputPrice = document.createElement('input');
                 inputPrice.type = 'hidden';
                 inputPrice.name = 'price';
-                inputPrice.value = priceElement.innerText.trim();
+                inputPrice.value = finalPrice;
                 form.appendChild(inputPrice);
 
-                // [3] ★원장님이 적으신 EmailJS 템플릿 글자와 100% 똑같이 글자 맞춤★
+                // --------------------------------------------------
+                // [3] ★구글 시트 열 이름 및 EmailJS 템플릿 100% 매칭 데이터 가공★
+                // --------------------------------------------------
                 var pairList = [
                     { id: 'name1', name: '이름1' },
                     { id: 'gender1', name: '성별1' },
-                    { id: 'birth_date1', name: '생년월일1' }, // 생일1 -> 생년월일1 수정 완료
-                    { id: 'birth_time1', name: '출생시간1' }, // 시간1 -> 출생시간1 수정 완료
-                    { id: 'birth_type1', name: '양력음력1' }, // 양음1 -> 양력음력1 수정 완료
-                    { id: 'user_phone', name: '전화번호' },
-                    { id: 'tel', name: '전화번호' },
-                    { id: 'email', name: '이메일' },
+                    { id: 'birth_date1', name: '생년월일1' },
+                    { id: 'birth_time1', name: '시간1' },
+                    { id: 'birth_type1', name: '양력/음력1' },
                     { id: 'name2', name: '이름2' },
                     { id: 'gender2', name: '성별2' },
-                    { id: 'birth_date2', name: '생년월일2' }, // 생일2 -> 생년월일2 수정 완료
-                    { id: 'birth_time2', name: '출생시간2' }, // 시간2 -> 출생시간2 수정 완료
-                    { id: 'birth_type2', name: '양력음력2' }  // 양음2 -> 양력음력2 수정 완료
-                ];
-
-                pairList.forEach(function (item) {
-                    var targetEl = document.getElementById(item.id) || document.querySelector('[name="' + item.id + '"]');
-                    if (targetEl) {
-                        var inputH = document.createElement('input');
-                        inputH.type = 'hidden';
-                        inputH.name = item.name;
-                        inputH.value = targetEl.value;
-                        form.appendChild(inputH);
-                    }
-                });
-            });
-        });
-    </script><script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var form = document.querySelector('.application-form') || document.querySelector('form');
-            if (!form) return;
-
-            form.addEventListener('submit', function (e) {
-                // 1. 라디오 버튼 s1 ~ s6 매칭 구역
-                var radioGroups = [];
-                document.querySelectorAll('input[type="radio"]').forEach(function (rd) {
-                    if (!radioGroups.includes(rd.name)) radioGroups.push(rd.name);
-                });
-
-                for (var i = 0; i < 6; i++) {
-                    var inputS = document.createElement('input');
-                    inputS.type = 'hidden';
-                    inputS.name = 's' + (i + 1);
-
-                    if (radioGroups[i]) {
-                        var checkedRadio = document.querySelector('input[name="' + radioGroups[i] + '"]:checked');
-                        if (checkedRadio) {
-                            var labelText = checkedRadio.closest('label')?.innerText || checkedRadio.parentElement?.innerText || checkedRadio.value || "";
-                            inputS.value = labelText.replace(/[\n\r]/g, '').trim();
-                        } else {
-                            inputS.value = "선택 안 함";
-                        }
-                    } else {
-                        inputS.value = "선택 안 함";
-                    }
-                    form.appendChild(inputS);
-                }
-
-                // 2. 최종 합계 금액 훔쳐오기 구역
-                var priceElement = document.querySelector('.total-price-display') || document.getElementById('total-price-display') || { innerText: "0원" };
-                var inputPrice = document.createElement('input');
-                inputPrice.type = 'hidden';
-                inputPrice.name = 'price';
-                inputPrice.value = priceElement.innerText.trim();
-                form.appendChild(inputPrice);
-
-                // 3. 브라우저 번역기 오작동 차단용 한글 주머니 매칭 구역
-                var pairList = [
-                    { id: 'name1', name: '이름1' },
-                    { id: 'gender1', name: '남,여1' },
-                    { id: 'birth_date1', name: '생년월일1' },
-                    { id: 'birth_time1', name: '태어난시간1' },
-                    { id: 'birth_type1', name: '양력,음력1' },
+                    { id: 'birth_date2', name: '생년월일2' },
+                    { id: 'birth_time2', name: '시간2' },
+                    { id: 'birth_type2', name: '양력/음력2' },
                     { id: 'user_phone', name: '전화번호' },
                     { id: 'tel', name: '전화번호' },
                     { id: 'email', name: '이메일' },
-                    { id: 'name2', name: '이름2' },
-                    { id: 'gender2', name: '남,여2' },
-                    { id: 'birth_date2', name: '생년월일2' },
-                    { id: 'birth_time2', name: '태어난시간2' },
-                    { id: 'birth_type2', name: '양력,음력2' }
+                    { id: 'additionalQuestions', name: '비고' }
                 ];
 
+                // 구글 시트에 순수하게 글자 형태로 보낼 주머니 데이터 생성
+                var googlePayload = {
+                    "접수일": new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+                    "상담신청서1": servicesTextList.join(", ") || "선택 없음",
+                    "이름1": document.getElementById('name1') ? document.getElementById('name1').value : "",
+                    "성별1": document.getElementById('gender1') ? document.getElementById('gender1').value : "",
+                    "생년월일1": document.getElementById('birth_date1') ? document.getElementById('birth_date1').value : "",
+                    "시간1": document.getElementById('birth_time1') ? document.getElementById('birth_time1').value : "",
+                    "양력/음력1": document.getElementById('birth_type1') ? document.getElementById('birth_type1').value : "",
+                    "상담신청서2": servicesTextList.length > 1 ? "추가 신청 항목 있음" : "",
+                    "이름2": document.getElementById('name2') ? document.getElementById('name2').value : "",
+                    "성별2": document.getElementById('gender2') ? document.getElementById('gender2').value : "",
+                    "생년월일2": document.getElementById('birth_date2') ? document.getElementById('birth_date2').value : "",
+                    "시간2": document.getElementById('birth_time2') ? document.getElementById('birth_time2').value : "",
+                    "양력/음력2": document.getElementById('birth_type2') ? document.getElementById('birth_type2').value : "",
+                    "합계금액": finalPrice,
+                    "전화번호": document.getElementById('user_phone') ? document.getElementById('user_phone').value : (document.getElementById('tel') ? document.getElementById('tel').value : ""),
+                    "이메일": document.getElementById('email') ? document.getElementById('email').value : "",
+                    "비고": document.getElementById('additionalQuestions') ? document.getElementById('additionalQuestions').value : ""
+                };
+
+                // 번역기 버그 방지용 HTML hidden input 태그들 화면에 생성 생성
                 pairList.forEach(function (item) {
                     var targetEl = document.getElementById(item.id) || document.querySelector('[name="' + item.id + '"]');
                     if (targetEl) {
@@ -997,8 +961,52 @@
                         form.appendChild(inputH);
                     }
                 });
+
+                // --------------------------------------------------
+                // [4] 구글 스프레드시트 릴레이 연동 시작!
+                // --------------------------------------------------
+                console.log("구글 시트로 데이터 적는 중...");
+
+                        // 🔗 fetch 옆 따옴표 안에 원장님의 '진짜 주소'를 넣고 괄호를 닫아줍니다!
+                fetch("https://script.google.com/macros/s/AKfycbzBxoQ20L1bRdvs5Z4j_7oDx8NZigz6fPZn_LQctUxbnrv0T0MRQj7OCgFxJKsuoarx/exec", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain" // CORS 차단 에러 원천 봉쇄용 보안 세팅
+                    },
+                    body: JSON.stringify(googlePayload)
+                })
+                        // 👈 여기서 깔끔하게 닫히고 바로 밑으로 이어져야 합니다!
+                    .then(function () {
+                        console.log("구글 시트 기록 성공! 이어서 EmailJS 메일을 발송합니다.");
+
+                         // --------------------------------------------------
+                        // [5] 구글 시트 저장이 완벽히 끝나면 원래 잘 되던 EmailJS 릴레이 작동!
+                        // --------------------------------------------------
+                        if (typeof emailjs !== 'undefined') {
+                            // ★ 원장님의 EmailJS 서비스ID와 템플릿ID를 따옴표 안에 정확히 적어주세요!
+                            return emailjs.sendForm('service_9oog4dh', 'template_3uwin9a', form);
+                        } else {
+                            throw new Error("EmailJS가 로드되지 않았습니다.");
+                        }
+                    })
+                    .then(function () {
+                        // --------------------------------------------------
+                        // [6] 둘 다 한 방에 성공했을 때 최종 축하 창 띄우고 깔끔하게 청소
+                        // --------------------------------------------------
+                        alert('상담 신청서가 구글시트에 안전하게 저장되었으며, 메일 발송도 완료되었습니다!');
+                        form.reset(); // 입력칸 초기화
+                        if (typeof calculateTotal === 'function') calculateTotal(); // 합계 금액 원상복구
+                    })
+                    .catch(function (error) {
+                        console.error("통합 전송 중 오류 발생:", error);
+                        alert("접수 중 오류가 발생했습니다. 하지만 입력하신 소중한 정보와 금액 계산 기능은 안전하게 유지됩니다.");
+                    });
             });
         });
     </script>
-/body>
+
+    <!-- Custom JavaScript -->
+    <script src="main.js"></script>
+
+</body>
 </html>
