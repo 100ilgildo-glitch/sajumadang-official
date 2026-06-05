@@ -485,3 +485,42 @@ function doPost(e) {
                          .setMimeType(ContentService.MimeType.JSON);
   }
 }
+
+            // // --------------------------------------------------
+            // [4] 구글 스프레드시트 릴레이 연동 시작!
+            // --------------------------------------------------
+            console.log("구글 시트로 데이터 적는 중...");
+            
+            // 🔗 원장님의 '진짜 새 주소(AKfycbzBxo...)'를 한 글자의 오차도 없이 완벽하게 고정했습니다!
+            fetch("https://script.google.com/macros/s/AKfycbzBxoQ20L1bRdvs5Z4j_7oDx8NZigz6fPZn_LQctUxbnrv0T0MRQj7OCgFxJKsuoarx/exec", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "text/plain" // CORS 차단 에러 원천 봉쇄용 보안 세팅
+                },
+                body: JSON.stringify(googlePayload)
+            })
+            .then(function(response) {
+                console.log("구글 시트 전송 완료 신호 수신. 이어서 메일을 발송합니다.");
+
+                // --------------------------------------------------
+                // [5] 구글 시트 저장이 완벽히 끝나면 원래 잘 되던 EmailJS 릴레이 작동!
+                // --------------------------------------------------
+                if (typeof emailjs !== 'undefined') {
+                    // ★ 원장님의 EmailJS 서비스ID와 템플릿ID를 따옴표 안에 정확히 적어주세요!
+                    return emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form);
+                } else {
+                    throw new Error("EmailJS가 로드되지 않았습니다.");
+                }
+            })
+            .then(function() {
+                // --------------------------------------------------
+                // [6] 둘 다 한 방에 성공했을 때 최종 성공 팝업
+                // --------------------------------------------------
+                alert('상담 신청서가 구글시트에 안전하게 저장되었으며, 메일 발송도 완료되었습니다!');
+                form.reset(); // 입력칸 초기화
+                if (typeof calculateTotal === 'function') calculateTotal(); // 합계 금액 원상복구
+            })
+            .catch(function(error) {
+                console.error("통합 전송 중 오류 발생:", error);
+                alert("접수 중 오류가 발생했습니다. 하지만 입력하신 소중한 정보와 금액 계산 기능은 안전하게 유지됩니다.");
+            });
