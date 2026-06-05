@@ -442,85 +442,589 @@ function debounce(func, wait) {
     };
 }
 
-function doPost(e) {
-  try {
-    // 🔗 진짜 연결고리: 사장님의 진짜 시트 이름 "사주마당 상담서비스 신청"으로 딱 고정합니다!
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("사주마당 상담서비스 신청");
-    
-    // 만약 시트 이름을 못 찾으면 첫 번째 시트라도 강제로 가져오는 안전장치
-    if (!sheet) {
-      sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+// ================================================
+// 사주마당 상담신청 폼 - 홈페이지 추가 JS 코드
+// sajumamadang.com 의 <script> 태그 안에 붙여넣기
+// ================================================
+
+// ── 설정값 ──────────────────────────────────────
+var GAS_URL  = "https://script.google.com/macros/s/AKfycbzBxoQ20L1bRdvs5Z4j_7oDx8NZigz6fPZn_LQctUxbnrv0T0MRQj7OCgFxJKsuoarx/exec";
+var EJS_SVC  = "service_9oog4dh";
+var EJS_TMPL = "template_3uwin9a";
+// ────────────────────────────────────────────────
+
+// EmailJS 초기화
+emailjs.init("tl5jPJIoiOMEfjMHj");
+
+// 폼 제출 이벤트
+// ※ "consultForm" → 실제 홈페이지 폼의 id로 변경하세요
+document.getElementById("consultForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  var btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "신청 중...";
+
+  // 오늘 날짜
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  var 접수일 = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate())
+             + " " + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+
+  // 폼 데이터 수집
+  // ※ 각 name="" 값이 홈페이지 폼 필드와 다르면 맞게 수정하세요
+  var data = {
+    "접수일":      접수일,
+    "상담신청서1": getVal("상담신청서1"),
+    "이름1":       getVal("이름1"),
+    "성별1":       getRadio("성별1"),
+    "생년월일1":   getVal("생년월일1"),
+    "시간1":       getVal("시간1"),
+    "양력/음력1":  getRadio("양력음력1"),
+    "상담신청서2": getVal("상담신청서2"),
+    "이름2":       getVal("이름2"),
+    "성별2":       getRadio("성별2"),
+    "생년월일2":   getVal("생년월일2"),
+    "시간2":       getVal("시간2"),
+    "양력/음력2":  getRadio("양력음력2"),
+    "합계금액":    getVal("합계금액"),
+    "전화번호":    getVal("전화번호"),
+    "이메일":      getVal("이메일"),
+    "비고":        getVal("비고")
+  };
+
+  // ① 구글 시트 저장
+  fetch(GAS_URL, {
+    method:  "POST",
+    mode:    "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify(data)
+  })
+  .then(function() {
+    // ② EmailJS 확인 메일 발송
+    return emailjs.send(EJS_SVC, EJS_TMPL, {
+      to_name:     data["이름1"],
+      to_email:    data["이메일"],
+      접수일:      data["접수일"],
+      합계금액:    data["합계금액"],
+      전화번호:    data["전화번호"],
+      이메일:      data["이메일"],
+      상담신청서1: data["상담신청서1"],
+      상담신청서2: data["상담신청서2"],
+      이름1:       data["이름1"],
+      성별1:       data["성별1"],
+      생년월일1:   data["생년월일1"],
+      시간1:       data["시간1"],
+      양력음력1:   data["양력/음력1"],
+      이름2:       data["이름2"]    || "해당없음",
+      성별2:       data["성별2"]    || "해당없음",
+      생년월일2:   data["생년월일2"] || "해당없음",
+      시간2:       data["시간2"]    || "해당없음",
+      양력음력2:   data["양력/음력2"] || "해당없음",
+      비고:        data["비고"]     || "없음"
+    });
+  })
+  .then(function() {
+    alert("상담 신청이 완료되었습니다!\n확인 이메일이 발송됩니다.");
+    document.getElementById("consultForm").reset();
+  })
+  .catch(function(err) {
+    console.error(err);
+    alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = "상담 신청하기";
+  });
+});
+
+// 폼 필드값 가져오기 헬퍼
+function getVal(name) {
+  var el = document.querySelector('[name="' + name + '"]');
+  return el ? el.value.trim() : "";
+}
+function getRadio(name) {
+  var el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+
+// ================================================
+// 사주마당 상담신청 폼 - 홈페이지 추가 JS 코드
+// sajumamadang.com 의 <script> 태그 안에 붙여넣기
+// ================================================
+// ── 설정값 ──────────────────────────────────────
+var GAS_URL  = "https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec";
+var EJS_SVC  = "service_9oog4dh";
+var EJS_TMPL = "template_3uwin9a";
+// ────────────────────────────────────────────────
+
+// EmailJS 초기화
+emailjs.init("tl5jPJIoiOMEfjMHj");
+
+// 폼 제출 이벤트
+// ※ "consultForm" → 실제 홈페이지 폼의 id로 변경하세요
+document.getElementById("consultForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  var btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "신청 중...";
+
+  // 오늘 날짜
+  var now = new Date();
+  var pad = function(n){ return String(n).padStart(2,"0"); };
+  var 접수일 = now.getFullYear() + "-" + pad(now.getMonth()+1) + "-" + pad(now.getDate())
+             + " " + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+
+  // 폼 데이터 수집
+  // ※ 각 name="" 값이 홈페이지 폼 필드와 다르면 맞게 수정하세요
+  var data = {
+    "접수일":      접수일,
+    "상담신청서1": getVal("상담신청서1"),
+    "이름1":       getVal("이름1"),
+    "성별1":       getRadio("성별1"),
+    "생년월일1":   getVal("생년월일1"),
+    "시간1":       getVal("시간1"),
+    "양력/음력1":  getRadio("양력음력1"),
+    "상담신청서2": getVal("상담신청서2"),
+    "이름2":       getVal("이름2"),
+    "성별2":       getRadio("성별2"),
+    "생년월일2":   getVal("생년월일2"),
+    "시간2":       getVal("시간2"),
+    "양력/음력2":  getRadio("양력음력2"),
+    "합계금액":    getVal("합계금액"),
+    "전화번호":    getVal("전화번호"),
+    "이메일":      getVal("이메일"),
+    "비고":        getVal("비고")
+  };
+
+  // ① 구글 시트 저장
+  fetch(GAS_URL, {
+    method:  "POST",
+    mode:    "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify(data)
+  })
+  .then(function() {
+    // ② EmailJS 확인 메일 발송
+    return emailjs.send(EJS_SVC, EJS_TMPL, {
+      to_name:     data["이름1"],
+      to_email:    data["이메일"],
+      접수일:      data["접수일"],
+      합계금액:    data["합계금액"],
+      전화번호:    data["전화번호"],
+      이메일:      data["이메일"],
+      상담신청서1: data["상담신청서1"],
+      상담신청서2: data["상담신청서2"],
+      이름1:       data["이름1"],
+      성별1:       data["성별1"],
+      생년월일1:   data["생년월일1"],
+      시간1:       data["시간1"],
+      양력음력1:   data["양력/음력1"],
+      이름2:       data["이름2"]    || "해당없음",
+      성별2:       data["성별2"]    || "해당없음",
+      생년월일2:   data["생년월일2"] || "해당없음",
+      시간2:       data["시간2"]    || "해당없음",
+      양력음력2:   data["양력/음력2"] || "해당없음",
+      비고:        data["비고"]     || "없음"
+    });
+  })
+  .then(function() {
+    alert("상담 신청이 완료되었습니다!\n확인 이메일이 발송됩니다.");
+    document.getElementById("consultForm").reset();
+  })
+  .catch(function(err) {
+    console.error(err);
+    alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+  })
+  .finally(function() {
+    btn.disabled = false;
+    btn.textContent = "상담 신청하기";
+  });
+});
+
+// 폼 필드값 가져오기 헬퍼
+function getVal(name) {
+  var el = document.querySelector('[name="' + name + '"]');
+  return el ? el.value.trim() : "";
+}
+function getRadio(name) {
+  var el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+
+/* ── EmailJS 초기화 ── */
+emailjs.init("tl5jPJIoiOMEfjMHj");
+
+/* ── 상수 ── */
+const GAS_URL    = "https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec";
+const EJS_SVC    = "service_9oog4dh";
+const EJS_TMPL   = "template_3uwin9a";
+
+/* ── 서비스 가격표 ── */
+const PRICE = {
+  svc_paengSaju:  { "선택안함": 0, "1인": 26600, "2인": 42000 },
+  svc_sinnyeonun: { "선택안함": 0, "1인": 17500, "2인": 26600 },
+  svc_jaemurun:   { "선택안함": 0, "1인": 17500, "2인": 26600 },
+  svc_geongangun: { "선택안함": 0, "1인": 14000, "2인": 21000 },
+  svc_gunghap:    { "선택안함": 0, "2인": 35000 }
+};
+
+/* ── 서비스 한국어 이름 ── */
+const SVC_LABEL = {
+  svc_paengSaju:  "평생사주",
+  svc_sinnyeonun: "신년운",
+  svc_jaemurun:   "재물운",
+  svc_geongangun: "건강운",
+  svc_gunghap:    "궁합"
+};
+
+/* =====================================================
+   유틸: 오늘 날짜 문자열 (YYYY-MM-DD HH:mm:ss)
+===================================================== */
+function getNowStr() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} `
+       + `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+/* =====================================================
+   유틸: 숫자 → "123,456원" 형식
+===================================================== */
+function formatWon(num) {
+  return num.toLocaleString("ko-KR") + "원";
+}
+
+/* =====================================================
+   선택된 라디오 값 가져오기
+===================================================== */
+function getRadioValue(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : "";
+}
+
+/* =====================================================
+   합계 금액 계산 + 화면 업데이트
+===================================================== */
+function calcTotal() {
+  let total = 0;
+  const parts = [];   // 선택된 서비스 목록 (시트 A열용)
+
+  Object.keys(PRICE).forEach(name => {
+    const val = getRadioValue(name);
+    if (!val || val === "선택안함") return;
+    const price = PRICE[name][val] ?? 0;
+    total += price;
+    parts.push(`${SVC_LABEL[name]}/${val}(${formatWon(price)})`);
+  });
+
+  /* 화면 갱신 */
+  const wonStr = formatWon(total);
+  document.getElementById("totalAmount").textContent = wonStr;
+  document.getElementById("hiddenTotal").value = wonStr;
+
+  /* 서비스 요약 (1인 / 2인 항목 분리) */
+  const sel1 = []; // 1인 서비스
+  const sel2 = []; // 2인 서비스
+  Object.keys(PRICE).forEach(name => {
+    const val = getRadioValue(name);
+    if (!val || val === "선택안함") return;
+    const line = `${SVC_LABEL[name]} ${val}`;
+    if (val === "1인") sel1.push(line);
+    else sel2.push(line);
+  });
+  document.getElementById("hiddenService1").value = sel1.join(", ") || "없음";
+  document.getElementById("hiddenService2").value = sel2.join(", ") || "없음";
+
+  /* 2인 섹션 표시 여부 */
+  const has2Person = Object.keys(PRICE).some(name => getRadioValue(name) === "2인");
+  const sec2 = document.getElementById("section-person2");
+  if (has2Person) {
+    sec2.classList.remove("hidden");
+    sec2.style.animation = "fadeUp .35s ease";
+  } else {
+    sec2.classList.add("hidden");
+  }
+
+  /* 선택된 서비스 항목 하이라이트 */
+  document.querySelectorAll(".service-item").forEach(item => {
+    const svcName = "svc_" + item.dataset.service;
+    const val = getRadioValue(svcName);
+    if (val && val !== "선택안함") {
+      item.classList.add("active");
+    } else {
+      item.classList.remove("active");
     }
-    
-    // HTML에서 보낸 한글 주머니 데이터를 풀어줍니다.
-    var data = JSON.parse(e.postData.contents);
-    
-    // 사장님의 구글 시트 열 순서(A열부터 Q열까지)에 한치의 오차도 없이 일치시켜 적습니다.
-    sheet.appendRow([
-      data["접수일"],       // A열
-      data["상담신청서1"],   // B열
-      data["이름1"],       // C열
-      data["성별1"],       // D열
-      data["생년월일1"],    // E열
-      data["시간1"],       // F열
-      data["양력/음력1"],    // G열
-      data["상담신청서2"],   // H열
-      data["이름2"],       // I열
-      data["성별2"],       // J열
-      data["생년월일2"],    // K열
-      data["시간2"],       // L열
-      data["양력/음력2"],    // M열
-      data["합계금액"],     // N열
-      data["전화번호"],     // O열
-      data["이메일"],       // P열
-      data["비고"]         // Q열
-    ]);
-    
-    // 전송 성공 신호 반환
-    return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
-                         .setMimeType(ContentService.MimeType.JSON);
-                         
-  } catch(error) {
-    return ContentService.createTextOutput(JSON.stringify({"result": "error", "message": error.toString()}))
-                         .setMimeType(ContentService.MimeType.JSON);
+  });
+
+  return total;
+}
+
+/* =====================================================
+   개인정보 동의 토글
+===================================================== */
+function togglePrivacy() {
+  const el = document.getElementById("privacyDetail");
+  const btn = document.querySelector(".btn-privacy-toggle");
+  if (el.style.display === "none") {
+    el.style.display = "block";
+    btn.textContent = "접기 ▴";
+  } else {
+    el.style.display = "none";
+    btn.textContent = "내용 보기 ▾";
   }
 }
 
-            // // --------------------------------------------------
-            // [4] 구글 스프레드시트 릴레이 연동 시작!
-            // --------------------------------------------------
-            console.log("구글 시트로 데이터 적는 중...");
-            
-            // 🔗 원장님의 '진짜 새 주소(AKfycbzBxo...)'를 한 글자의 오차도 없이 완벽하게 고정했습니다!
-            fetch("https://script.google.com/macros/s/AKfycbzBxoQ20L1bRdvs5Z4j_7oDx8NZigz6fPZn_LQctUxbnrv0T0MRQj7OCgFxJKsuoarx/exec", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "text/plain" // CORS 차단 에러 원천 봉쇄용 보안 세팅
-                },
-                body: JSON.stringify(googlePayload)
-            })
-            .then(function(response) {
-                console.log("구글 시트 전송 완료 신호 수신. 이어서 메일을 발송합니다.");
+/* =====================================================
+   오류 메시지 표시 / 숨기기
+===================================================== */
+function showError(msg) {
+  const el = document.getElementById("errorMsg");
+  document.getElementById("errorText").textContent = msg;
+  el.style.display = "block";
+  el.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function hideError() {
+  document.getElementById("errorMsg").style.display = "none";
+}
 
-                // --------------------------------------------------
-                // [5] 구글 시트 저장이 완벽히 끝나면 원래 잘 되던 EmailJS 릴레이 작동!
-                // --------------------------------------------------
-                if (typeof emailjs !== 'undefined') {
-                    // ★ 원장님의 EmailJS 서비스ID와 템플릿ID를 따옴표 안에 정확히 적어주세요!
-                    return emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form);
-                } else {
-                    throw new Error("EmailJS가 로드되지 않았습니다.");
-                }
-            })
-            .then(function() {
-                // --------------------------------------------------
-                // [6] 둘 다 한 방에 성공했을 때 최종 성공 팝업
-                // --------------------------------------------------
-                alert('상담 신청서가 구글시트에 안전하게 저장되었으며, 메일 발송도 완료되었습니다!');
-                form.reset(); // 입력칸 초기화
-                if (typeof calculateTotal === 'function') calculateTotal(); // 합계 금액 원상복구
-            })
-            .catch(function(error) {
-                console.error("통합 전송 중 오류 발생:", error);
-                alert("접수 중 오류가 발생했습니다. 하지만 입력하신 소중한 정보와 금액 계산 기능은 안전하게 유지됩니다.");
-            });
+/* =====================================================
+   폼 유효성 검사
+===================================================== */
+function validateForm() {
+  /* 1) 서비스 하나 이상 선택 */
+  const hasService = Object.keys(PRICE).some(name => {
+    const v = getRadioValue(name);
+    return v && v !== "선택안함";
+  });
+  if (!hasService) {
+    showError("서비스를 하나 이상 선택해 주세요.");
+    return false;
+  }
+
+  /* 2) 1번째 분 이름 */
+  const name1 = document.getElementById("name1").value.trim();
+  if (!name1) {
+    showError("1번째 분의 이름을 입력해 주세요.");
+    document.getElementById("name1").focus();
+    return false;
+  }
+
+  /* 3) 1번째 분 성별 */
+  if (!getRadioValue("성별1")) {
+    showError("1번째 분의 성별을 선택해 주세요.");
+    return false;
+  }
+
+  /* 4) 1번째 분 생년월일 */
+  const birth1 = document.getElementById("birth1").value;
+  if (!birth1) {
+    showError("1번째 분의 생년월일을 입력해 주세요.");
+    document.getElementById("birth1").focus();
+    return false;
+  }
+
+  /* 5) 2인 서비스 선택 시 → 2번째 분 정보 체크 */
+  const has2Person = Object.keys(PRICE).some(name => getRadioValue(name) === "2인");
+  if (has2Person) {
+    const name2 = document.getElementById("name2").value.trim();
+    if (!name2) {
+      showError("2인 서비스를 선택하셨습니다. 2번째 분의 이름을 입력해 주세요.");
+      document.getElementById("name2").focus();
+      return false;
+    }
+    if (!getRadioValue("성별2")) {
+      showError("2번째 분의 성별을 선택해 주세요.");
+      return false;
+    }
+    const birth2 = document.getElementById("birth2").value;
+    if (!birth2) {
+      showError("2번째 분의 생년월일을 입력해 주세요.");
+      document.getElementById("birth2").focus();
+      return false;
+    }
+  }
+
+  /* 6) 전화번호 */
+  const phone = document.getElementById("phone").value.trim();
+  if (!phone) {
+    showError("전화번호를 입력해 주세요.");
+    document.getElementById("phone").focus();
+    return false;
+  }
+
+  /* 7) 이메일 */
+  const email = document.getElementById("email").value.trim();
+  const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailReg.test(email)) {
+    showError("올바른 이메일 주소를 입력해 주세요.");
+    document.getElementById("email").focus();
+    return false;
+  }
+
+  /* 8) 개인정보 동의 */
+  if (!document.getElementById("privacyAgree").checked) {
+    showError("개인정보 수집 및 이용에 동의해 주세요.");
+    return false;
+  }
+
+  return true;
+}
+
+/* =====================================================
+   데이터 수집 (구글 시트 열 순서에 맞게)
+===================================================== */
+function collectData() {
+  const has2Person = Object.keys(PRICE).some(name => getRadioValue(name) === "2인");
+
+  return {
+    접수일:       getNowStr(),                                        // A열
+    상담신청서1:  document.getElementById("hiddenService1").value,    // B열
+    이름1:        document.getElementById("name1").value.trim(),      // C열
+    성별1:        getRadioValue("성별1"),                             // D열
+    생년월일1:    document.getElementById("birth1").value,            // E열
+    시간1:        document.getElementById("time1").value,             // F열
+    양력음력1:    getRadioValue("양력음력1"),                         // G열
+    상담신청서2:  document.getElementById("hiddenService2").value,    // H열
+    이름2:        has2Person ? document.getElementById("name2").value.trim() : "",  // I열
+    성별2:        has2Person ? getRadioValue("성별2") : "",           // J열
+    생년월일2:    has2Person ? document.getElementById("birth2").value : "",        // K열
+    시간2:        has2Person ? document.getElementById("time2").value : "",         // L열
+    양력음력2:    has2Person ? getRadioValue("양력음력2") : "",       // M열
+    합계금액:     document.getElementById("hiddenTotal").value,       // N열
+    전화번호:     document.getElementById("phone").value.trim(),      // O열
+    이메일:       document.getElementById("email").value.trim(),      // P열
+    비고:         document.getElementById("remark").value.trim()      // Q열
+  };
+}
+
+/* =====================================================
+   ① Google Apps Script (구글 시트 저장)
+===================================================== */
+async function sendToGoogleSheet(data) {
+  const response = await fetch(GAS_URL, {
+    method:  "POST",
+    mode:    "no-cors",   /* GAS는 no-cors 필수 */
+    headers: { "Content-Type": "application/json" },
+    body:    JSON.stringify(data)
+  });
+  /* no-cors 모드에서는 response.ok 확인 불가 → 전송 완료로 간주 */
+  return true;
+}
+
+/* =====================================================
+   ② EmailJS (신청자 확인 이메일 발송)
+===================================================== */
+async function sendEmail(data) {
+  /* EmailJS 템플릿 변수명과 일치시킴 */
+  const params = {
+    /* 수신자 */
+    to_email:      data.이메일,
+    to_name:       data.이름1,
+
+    /* 접수 정보 */
+    접수일:        data.접수일,
+    합계금액:      data.합계금액,
+    전화번호:      data.전화번호,
+    이메일:        data.이메일,
+    비고:          data.비고 || "없음",
+
+    /* 선택 서비스 */
+    상담신청서1:   data.상담신청서1 || "없음",
+    상담신청서2:   data.상담신청서2 || "없음",
+
+    /* 1번째 분 */
+    이름1:         data.이름1,
+    성별1:         data.성별1,
+    생년월일1:     data.생년월일1,
+    시간1:         data.시간1,
+    양력음력1:     data.양력음력1,
+
+    /* 2번째 분 */
+    이름2:         data.이름2 || "해당없음",
+    성별2:         data.성별2 || "해당없음",
+    생년월일2:     data.생년월일2 || "해당없음",
+    시간2:         data.시간2 || "해당없음",
+    양력음력2:     data.양력음력2 || "해당없음"
+  };
+
+  return emailjs.send(EJS_SVC, EJS_TMPL, params);
+}
+
+/* =====================================================
+   버튼 상태 토글
+===================================================== */
+function setLoading(isLoading) {
+  const btn = document.getElementById("submitBtn");
+  if (isLoading) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> 신청 중...`;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> 상담 신청하기`;
+  }
+}
+
+/* =====================================================
+   폼 초기화 (다시 신청하기)
+===================================================== */
+function resetForm() {
+  document.getElementById("consultForm").reset();
+  document.getElementById("successMsg").style.display = "none";
+  document.getElementById("consultForm").style.display = "block";
+  calcTotal();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* =====================================================
+   폼 제출 핸들러
+===================================================== */
+document.getElementById("consultForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  hideError();
+
+  /* 유효성 검사 */
+  if (!validateForm()) return;
+
+  /* 데이터 수집 */
+  const data = collectData();
+
+  /* 로딩 시작 */
+  setLoading(true);
+
+  try {
+    /* ① 구글 시트 저장 */
+    await sendToGoogleSheet(data);
+
+    /* ② 이메일 발송 */
+    await sendEmail(data);
+
+    /* 완료 처리 */
+    document.getElementById("consultForm").style.display = "none";
+    document.getElementById("successMsg").style.display = "block";
+    document.getElementById("successMsg").scrollIntoView({ behavior: "smooth", block: "center" });
+
+  } catch (err) {
+    console.error("신청 오류:", err);
+    showError("신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.\n(" + (err.text || err.message || err) + ")");
+  } finally {
+    setLoading(false);
+  }
+});
+
+/* =====================================================
+   서비스 라디오 변경 → 합계 자동 계산
+===================================================== */
+document.getElementById("serviceList").addEventListener("change", function (e) {
+  if (e.target.type === "radio") {
+    calcTotal();
+  }
+});
+
+/* =====================================================
+   페이지 로드 시 초기화
+===================================================== */
+document.addEventListener("DOMContentLoaded", function () {
+  calcTotal();
+});
