@@ -426,7 +426,7 @@ function formatDate(dateString) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
-    return `${year}년 ${month}월 ${day}일`; 
+    return `${year}년 ${month}월 ${day}일`;
 }
 
 // Debounce function for performance
@@ -442,11 +442,153 @@ function debounce(func, wait) {
     };
 }
 
-  };
+// ===================================
+// 사주마당 - 구글 시트 & 이메일 연동
+// ===================================
 
+// 구글 Apps Script 웹앱 URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec';
 
- 
- 
-  
+// EmailJS 설정
+const EMAILJS_USER_ID = 'tl5jPJIoiOMEfjMHj';
+const EMAILJS_SERVICE_ID = 'service_9oog4dh';
+const EMAILJS_TEMPLATE_ID = 'template_3uwin9a';
 
- 
+// EmailJS 초기화
+(function() {
+    emailjs.init(EMAILJS_USER_ID);
+})();
+
+// ===================================
+// 구글 시트에 데이터 전송
+// ===================================
+
+async function sendToGoogleSheet(formData) {
+    try {
+        // 구글 시트용 데이터 포맷 변환
+        const sheetData = {
+            접수일: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+            상담신청서1: formData.services.join(', '),
+            이름1: formData.person1.name,
+            성별1: formData.person1.gender,
+            생년월일1: formData.person1.birthDate,
+            시간1: formData.person1.birthTime,
+            양력음력1: formData.person1.birthType,
+            상담신청서2: formData.person2 ? formData.services.join(', ') : '',
+            이름2: formData.person2 ? formData.person2.name : '',
+            성별2: formData.person2 ? formData.person2.gender : '',
+            생년월일2: formData.person2 ? formData.person2.birthDate : '',
+            시간2: formData.person2 ? formData.person2.birthTime : '',
+            양력음력2: formData.person2 ? formData.person2.birthType : '',
+            합계금액: formData.totalPrice,
+            전화번호: formData.contact.phone,
+            이메일: formData.contact.email,
+            비고: formData.additionalQuestions
+        };
+
+        // 구글 시트로 POST 요청
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sheetData)
+        });
+
+        console.log('✅ 구글 시트 전송 완료');
+        return true;
+
+    } catch (error) {
+        console.error('❌ 구글 시트 전송 실패:', error);
+        return false;
+    }
+}
+
+// ===================================
+// EmailJS로 이메일 발송
+// ===================================
+
+async function sendEmailNotification(formData) {
+    try {
+        // 서비스 목록을 문자열로 변환
+        const servicesText = formData.services.join(', ');
+        
+        // 2인 정보 텍스트 생성
+        let person2Text = '';
+        if (formData.person2) {
+            person2Text = `
+[두 번째 분 정보]
+이름: ${formData.person2.name} (${formData.person2.gender})
+생년월일: ${formData.person2.birthDate} (${formData.person2.birthType})
+태어난 시간: ${formData.person2.birthTime}
+            `.trim();
+        }
+
+        // EmailJS 템플릿 파라미터
+        const templateParams = {
+            to_email: formData.contact.email,
+            services: servicesText,
+            total_price: formData.totalPrice,
+            name1: formData.person1.name,
+            gender1: formData.person1.gender,
+            birth_date1: formData.person1.birthDate,
+            birth_type1: formData.person1.birthType,
+            birth_time1: formData.person1.birthTime,
+            person2_info: person2Text,
+            phone: formData.contact.phone,
+            email: formData.contact.email,
+            additional_questions: formData.additionalQuestions,
+            submission_date: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+        };
+
+        // 이메일 발송
+        const response = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            templateParams
+        );
+
+        console.log('✅ 이메일 발송 완료:', response.status, response.text);
+        return true;
+
+    } catch (error) {
+        console.error('❌ 이메일 발송 실패:', error);
+        return false;
+    }
+}
+
+// ===================================
+// 통합 전송 함수
+// ===================================
+
+async function submitFormData(formData) {
+    // 로딩 표시 (선택사항)
+    console.log('📤 데이터 전송 중...');
+
+    // 병렬로 구글 시트와 이메일 전송
+    const [sheetResult, emailResult] = await Promise.all([
+        sendToGoogleSheet(formData),
+        sendEmailNotification(formData)
+    ]);
+
+    if (sheetResult && emailResult) {
+        console.log('✅ 모든 데이터 전송 완료!');
+        return { success: true, message: '신청이 완료되었습니다!' };
+    } else if (sheetResult) {
+        console.log('⚠️ 구글 시트만 전송 완료 (이메일 실패)');
+        return { success: true, message: '신청이 완료되었으나 이메일 발송에 실패했습니다.' };
+    } else if (emailResult) {
+        console.log('⚠️ 이메일만 전송 완료 (구글 시트 실패)');
+        return { success: true, message: '신청이 완료되었으나 데이터 저장에 실패했습니다.' };
+    } else {
+        console.log('❌ 전송 실패');
+        return { success: false, message: '전송에 실패했습니다. 다시 시도해주세요.' };
+    }
+}
+
+// ===================================
+// 전역으로 내보내기
+// ===================================
+
+window.submitFormData = submitFormData;
