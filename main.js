@@ -2,6 +2,8 @@
 // 사주마당 - JavaScript
 // ===================================
 
+let isSubmitting = false;
+
 // Wait for DOM to load
 document.addEventListener('DOMContentLoaded', function() {
     initNavigation();
@@ -221,8 +223,12 @@ function initForm() {
 
     // Form submission
     if (form) {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            if (isSubmitting) {
+                return;
+            }
             
             // Validate that at least one service is selected
             const hasSelectedService = Array.from(serviceRadios).some(radio => 
@@ -252,13 +258,46 @@ function initForm() {
 
             // Collect form data
             const formData = collectFormData();
-            
-            // Show success modal
-            showSuccessModal(formData);
-            
-            // Reset form
-            form.reset();
-            calculateTotal();
+            const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+            const originalButtonText = submitButton ? (submitButton.textContent || submitButton.value) : '';
+
+            try {
+                isSubmitting = true;
+
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    if ('textContent' in submitButton) {
+                        submitButton.textContent = '접수 처리 중...';
+                    } else {
+                        submitButton.value = '접수 처리 중...';
+                    }
+                }
+
+                const submitResult = await submitFormData(formData);
+
+                if (!submitResult.success) {
+                    alert(submitResult.message || '전송에 실패했습니다. 다시 시도해주세요.');
+                    return;
+                }
+
+                // 입금 안내만 띄우고 여기서 종료
+                showSuccessModal(formData, submitResult.message);
+                return;
+
+            } catch (error) {
+                console.error('❌ 제출 처리 중 오류:', error);
+                alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+            } finally {
+                isSubmitting = false;
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    if ('textContent' in submitButton) {
+                        submitButton.textContent = originalButtonText || '신청하기';
+                    } else {
+                        submitButton.value = originalButtonText || '신청하기';
+                    }
+                }
+            }
         });
     }
 
@@ -354,6 +393,7 @@ function initModal() {
     }
 
     if (modalConfirm) {
+        modalConfirm.textContent = '안내 확인';
         modalConfirm.addEventListener('click', closeModal);
     }
 
@@ -367,11 +407,15 @@ function initModal() {
     }
 }
 
-function showSuccessModal(formData) {
+function showSuccessModal(formData, submitMessage = '') {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
 
     let html = `
+        <p style="color: #8B6F47; font-weight: 700; margin-bottom: 1rem;">
+            <i class="fas fa-info-circle"></i> 신청이 접수되었습니다. 현재 단계는 <strong>입금 안내</strong>입니다.
+        </p>
+        ${submitMessage ? `<p style="margin-bottom: 1rem;">${submitMessage}</p>` : ''}
         <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
         <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
@@ -398,11 +442,12 @@ function showSuccessModal(formData) {
         <p><strong>추가 질문:</strong><br>${formData.additionalQuestions}</p>
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
         <p style="color: #8B6F47; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> 다음 단계:<br>
+        <i class="fas fa-info-circle"></i> 입금 안내:<br>
         <small style="font-weight: normal;">
         1. 농협 351-1377-7789-03 (문광희)로 ${formData.totalPrice}을 입금해주세요<br>
         2. 입금 후 010-9486-4936으로 연락주시거나 입금자명을 남겨주세요<br>
-        3. 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
+        3. 입금 확인 후 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다<br><br>
+        ※ 현재 단계는 결제 완료가 아니라 <strong>입금 대기</strong> 상태입니다.
         </small>
         </p>
     `;
@@ -487,7 +532,7 @@ async function sendToGoogleSheet(formData) {
         };
 
         // 구글 시트로 POST 요청
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
+        await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
@@ -574,13 +619,13 @@ async function submitFormData(formData) {
 
     if (sheetResult && emailResult) {
         console.log('✅ 모든 데이터 전송 완료!');
-        return { success: true, message: '신청이 완료되었습니다!' };
+        return { success: true, message: '신청이 접수되었습니다. 아래 입금 안내를 확인해주세요.' };
     } else if (sheetResult) {
         console.log('⚠️ 구글 시트만 전송 완료 (이메일 실패)');
-        return { success: true, message: '신청이 완료되었으나 이메일 발송에 실패했습니다.' };
+        return { success: true, message: '신청은 접수되었지만 이메일 발송에 실패했습니다. 아래 입금 안내를 확인해주세요.' };
     } else if (emailResult) {
         console.log('⚠️ 이메일만 전송 완료 (구글 시트 실패)');
-        return { success: true, message: '신청이 완료되었으나 데이터 저장에 실패했습니다.' };
+        return { success: true, message: '신청은 접수되었지만 데이터 저장에 일부 문제가 있습니다. 아래 입금 안내를 확인해주세요.' };
     } else {
         console.log('❌ 전송 실패');
         return { success: false, message: '전송에 실패했습니다. 다시 시도해주세요.' };
