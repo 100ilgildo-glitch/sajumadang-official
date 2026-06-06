@@ -5,7 +5,7 @@
 let isSubmitting = false;
 
 // Wait for DOM to load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initNavigation();
     initScrollEffects();
     initForm();
@@ -23,33 +23,32 @@ function initNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const navbar = document.getElementById('navbar');
 
-    // Mobile menu toggle
     if (navToggle) {
-        navToggle.addEventListener('click', function() {
+        navToggle.addEventListener('click', function () {
             this.classList.toggle('active');
-            navMenu.classList.toggle('active');
+            if (navMenu) navMenu.classList.toggle('active');
         });
     }
 
-    // Close mobile menu when clicking on a link
     navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            navToggle.classList.remove('active');
-            navMenu.classList.remove('active');
+        link.addEventListener('click', function () {
+            if (navToggle) navToggle.classList.remove('active');
+            if (navMenu) navMenu.classList.remove('active');
         });
     });
 
-    // Smooth scrolling for navigation links
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
+        link.addEventListener('click', function (e) {
             const targetId = this.getAttribute('href');
+            if (!targetId || !targetId.startsWith('#')) return;
+
+            e.preventDefault();
             const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
+
+            if (targetSection && navbar) {
                 const navbarHeight = navbar.offsetHeight;
                 const targetPosition = targetSection.offsetTop - navbarHeight;
-                
+
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
@@ -58,14 +57,15 @@ function initNavigation() {
         });
     });
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 100) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
 }
 
 // ===================================
@@ -73,11 +73,10 @@ function initNavigation() {
 // ===================================
 
 function initScrollEffects() {
-    // Scroll to top button
     const scrollToTopBtn = document.getElementById('scrollToTop');
-    
+
     if (scrollToTopBtn) {
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (window.scrollY > 300) {
                 scrollToTopBtn.classList.add('visible');
             } else {
@@ -85,7 +84,7 @@ function initScrollEffects() {
             }
         });
 
-        scrollToTopBtn.addEventListener('click', function() {
+        scrollToTopBtn.addEventListener('click', function () {
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -93,13 +92,12 @@ function initScrollEffects() {
         });
     }
 
-    // Intersection Observer for fade-in animations
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
 
-    const observer = new IntersectionObserver(function(entries) {
+    const observer = new IntersectionObserver(function (entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '1';
@@ -108,7 +106,6 @@ function initScrollEffects() {
         });
     }, observerOptions);
 
-    // Observe service cards
     document.querySelectorAll('.service-card').forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
@@ -116,7 +113,6 @@ function initScrollEffects() {
         observer.observe(card);
     });
 
-    // Observe process steps
     document.querySelectorAll('.process-step').forEach(step => {
         step.style.opacity = '0';
         step.style.transform = 'translateY(30px)';
@@ -133,47 +129,57 @@ function initForm() {
     const form = document.getElementById('applicationForm');
     const totalPriceElement = document.getElementById('totalPrice');
     const person2Section = document.getElementById('person2Section');
-    
-    // Service radio buttons
-    const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
+
+    const serviceNames = [
+        'service_lifelong',
+        'service_newyear',
+        'service_wealth',
+        'service_health',
+        'service_career',
+        'service_compatibility'
+    ];
+
+    const serviceRadios = document.querySelectorAll('input[type="radio"]');
 
     function getCalculatedTotal() {
         let total = 0;
         let hasTwoPerson = false;
 
-        serviceRadios.forEach(radio => {
-            if (radio.checked && radio.value !== 'none') {
-                total += Number(radio.dataset.price || 0);
+        serviceNames.forEach(name => {
+            const selected = document.querySelector(`input[name="${name}"]:checked`);
+            if (!selected || selected.value === 'none') return;
 
-                if (radio.value === '2') {
-                    hasTwoPerson = true;
-                }
+            total += Number(selected.dataset.price || 0);
+
+            if (selected.value === '2') {
+                hasTwoPerson = true;
             }
         });
 
-        return {
-            total,
-            hasTwoPerson
-        };
+        return { total, hasTwoPerson };
     }
-    
-    // Calculate total price
+
     function calculateTotal() {
         const { total, hasTwoPerson } = getCalculatedTotal();
 
-        // Show/hide person 2 section
-        if (hasTwoPerson) {
-            person2Section.style.display = 'block';
-            // Make person 2 fields required
-            document.getElementById('name2').required = true;
-            document.getElementById('gender2').required = true;
-            document.getElementById('birth_date2').required = true;
-        } else {
-            person2Section.style.display = 'none';
-            // Make person 2 fields optional
-            document.getElementById('name2').required = false;
-            document.getElementById('gender2').required = false;
-            document.getElementById('birth_date2').required = false;
+        if (person2Section) {
+            if (hasTwoPerson) {
+                person2Section.style.display = 'block';
+                const name2 = document.getElementById('name2');
+                const gender2 = document.getElementById('gender2');
+                const birthDate2 = document.getElementById('birth_date2');
+                if (name2) name2.required = true;
+                if (gender2) gender2.required = true;
+                if (birthDate2) birthDate2.required = true;
+            } else {
+                person2Section.style.display = 'none';
+                const name2 = document.getElementById('name2');
+                const gender2 = document.getElementById('gender2');
+                const birthDate2 = document.getElementById('birth_date2');
+                if (name2) name2.required = false;
+                if (gender2) gender2.required = false;
+                if (birthDate2) birthDate2.required = false;
+            }
         }
 
         if (totalPriceElement) {
@@ -181,22 +187,15 @@ function initForm() {
         }
     }
 
-    // Add event listeners to all radio buttons
     serviceRadios.forEach(radio => {
         radio.addEventListener('change', calculateTotal);
     });
 
-    // Also add listeners to "none" options
-    document.querySelectorAll('input[type="radio"][value="none"]').forEach(radio => {
-        radio.addEventListener('change', calculateTotal);
-    });
-
-    // Phone number formatting
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
+        phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/[^\d]/g, '');
-            
+
             if (value.length <= 3) {
                 e.target.value = value;
             } else if (value.length <= 7) {
@@ -207,79 +206,74 @@ function initForm() {
         });
     }
 
-    // Time unknown checkboxes
     const timeUnknown1 = document.getElementById('time_unknown1');
     const birthTime1 = document.getElementById('birth_time1');
     const timeUnknown2 = document.getElementById('time_unknown2');
     const birthTime2 = document.getElementById('birth_time2');
 
     if (timeUnknown1 && birthTime1) {
-        timeUnknown1.addEventListener('change', function() {
+        timeUnknown1.addEventListener('change', function () {
             birthTime1.disabled = this.checked;
-            if (this.checked) {
-                birthTime1.value = '';
-            }
+            if (this.checked) birthTime1.value = '';
         });
     }
 
     if (timeUnknown2 && birthTime2) {
-        timeUnknown2.addEventListener('change', function() {
+        timeUnknown2.addEventListener('change', function () {
             birthTime2.disabled = this.checked;
-            if (this.checked) {
-                birthTime2.value = '';
-            }
+            if (this.checked) birthTime2.value = '';
         });
     }
 
-    // Form submission
     if (form) {
-        form.addEventListener('submit', async function(e) {
+        form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            if (isSubmitting) {
-                return;
-            }
-            
-            // Validate that at least one service is selected
-            const hasSelectedService = Array.from(serviceRadios).some(radio => 
-                radio.checked && radio.value !== 'none'
-            );
+            if (isSubmitting) return;
+
+            const hasSelectedService = serviceNames.some(name => {
+                const selected = document.querySelector(`input[name="${name}"]:checked`);
+                return selected && selected.value !== 'none';
+            });
 
             if (!hasSelectedService) {
                 alert('최소 1개 이상의 서비스를 선택해주세요.');
                 return;
             }
 
-            // Validate email format
-            const email = document.getElementById('email').value;
+            const emailEl = document.getElementById('email');
+            const phoneEl = document.getElementById('phone');
+
+            const email = emailEl ? emailEl.value.trim() : '';
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email)) {
                 alert('올바른 이메일 주소를 입력해주세요.');
                 return;
             }
 
-            // Validate phone number
-            const phone = document.getElementById('phone').value;
             const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
             if (!phonePattern.test(phone)) {
                 alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
                 return;
             }
 
-            // Collect form data
             const formData = collectFormData();
             const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
-            const originalButtonText = submitButton ? (submitButton.textContent || submitButton.value) : '';
+            const originalButtonText = submitButton
+                ? (submitButton.tagName === 'INPUT' ? submitButton.value : submitButton.textContent)
+                : '';
 
             try {
                 isSubmitting = true;
 
                 if (submitButton) {
                     submitButton.disabled = true;
-                    if ('textContent' in submitButton) {
-                        submitButton.textContent = '접수 처리 중...';
-                    } else {
+                    if (submitButton.tagName === 'INPUT') {
                         submitButton.value = '접수 처리 중...';
+                    } else {
+                        submitButton.textContent = '접수 처리 중...';
                     }
                 }
 
@@ -290,66 +284,78 @@ function initForm() {
                     return;
                 }
 
-                // 입금 안내만 띄우고 여기서 종료
                 showDepositOnlyModal(formData, submitResult.message);
-                return;
 
             } catch (error) {
                 console.error('❌ 제출 처리 중 오류:', error);
                 alert('제출 중 오류가 발생했습니다. 다시 시도해주세요.');
             } finally {
                 isSubmitting = false;
+
                 if (submitButton) {
                     submitButton.disabled = false;
-                    if ('textContent' in submitButton) {
-                        submitButton.textContent = originalButtonText || '신청하기';
-                    } else {
+                    if (submitButton.tagName === 'INPUT') {
                         submitButton.value = originalButtonText || '신청하기';
+                    } else {
+                        submitButton.textContent = originalButtonText || '신청하기';
                     }
                 }
             }
         });
     }
 
-    // Initial calculation
     calculateTotal();
 }
 
 function collectFormData() {
-    const selectedServiceRadios = document.querySelectorAll('input[type="radio"][data-price]');
+    const serviceNames = [
+        'service_lifelong',
+        'service_newyear',
+        'service_wealth',
+        'service_health',
+        'service_career',
+        'service_compatibility'
+    ];
+
     let computedTotal = 0;
 
-    selectedServiceRadios.forEach(radio => {
-        if (radio.checked && radio.value !== 'none') {
-            computedTotal += Number(radio.dataset.price || 0);
-        }
+    serviceNames.forEach(name => {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        if (!selected || selected.value === 'none') return;
+        computedTotal += Number(selected.dataset.price || 0);
     });
+
+    const gender1El = document.getElementById('gender1');
+    const birthType1El = document.getElementById('birth_type1');
+    const timeUnknown1El = document.getElementById('time_unknown1');
+    const birthTime1El = document.getElementById('birth_time1');
 
     const data = {
         services: [],
         totalPrice: computedTotal.toLocaleString('ko-KR') + '원',
         person1: {
-            name: document.getElementById('name1').value,
-            gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date1').value,
-            birthTime: document.getElementById('time_unknown1').checked ? '시간 미상' : (document.getElementById('birth_time1').value || '미입력')
+            name: document.getElementById('name1')?.value || '',
+            gender: gender1El && gender1El.value === 'male' ? '남성' : '여성',
+            birthType: birthType1El && birthType1El.value === 'solar' ? '양력' : '음력',
+            birthDate: document.getElementById('birth_date1')?.value || '',
+            birthTime: timeUnknown1El && timeUnknown1El.checked
+                ? '시간 미상'
+                : (birthTime1El?.value || '미입력')
         },
         contact: {
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value
+            phone: document.getElementById('phone')?.value || '',
+            email: document.getElementById('email')?.value || ''
         },
-        additionalQuestions: document.getElementById('additional_questions').value || '없음'
+        additionalQuestions: document.getElementById('additional_questions')?.value || '없음'
     };
 
-    // Collect selected services
     const serviceMapping = {
-        'service_lifelong': '평생사주',
-        'service_newyear': '2026년 신년운',
-        'service_wealth': '재물운',
-        'service_health': '건강운',
-        'service_career': '직업운',
-        'service_compatibility': '궁합'
+        service_lifelong: '평생사주',
+        service_newyear: '2026년 신년운',
+        service_wealth: '재물운',
+        service_health: '건강운',
+        service_career: '직업운',
+        service_compatibility: '궁합'
     };
 
     Object.keys(serviceMapping).forEach(key => {
@@ -360,14 +366,21 @@ function collectFormData() {
         }
     });
 
-    // Check if person 2 section is visible
-    if (document.getElementById('person2Section').style.display === 'block') {
+    const person2Section = document.getElementById('person2Section');
+    if (person2Section && person2Section.style.display === 'block') {
+        const gender2El = document.getElementById('gender2');
+        const birthType2El = document.getElementById('birth_type2');
+        const timeUnknown2El = document.getElementById('time_unknown2');
+        const birthTime2El = document.getElementById('birth_time2');
+
         data.person2 = {
-            name: document.getElementById('name2').value,
-            gender: document.getElementById('gender2').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type2').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date2').value,
-            birthTime: document.getElementById('time_unknown2').checked ? '시간 미상' : (document.getElementById('birth_time2').value || '미입력')
+            name: document.getElementById('name2')?.value || '',
+            gender: gender2El && gender2El.value === 'male' ? '남성' : '여성',
+            birthType: birthType2El && birthType2El.value === 'solar' ? '양력' : '음력',
+            birthDate: document.getElementById('birth_date2')?.value || '',
+            birthTime: timeUnknown2El && timeUnknown2El.checked
+                ? '시간 미상'
+                : (birthTime2El?.value || '미입력')
         };
     }
 
@@ -380,19 +393,18 @@ function collectFormData() {
 
 function initFAQ() {
     const faqItems = document.querySelectorAll('.faq-item');
-    
+
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
-        
-        question.addEventListener('click', function() {
-            // Close other items
+        if (!question) return;
+
+        question.addEventListener('click', function () {
             faqItems.forEach(otherItem => {
                 if (otherItem !== item && otherItem.classList.contains('active')) {
                     otherItem.classList.remove('active');
                 }
             });
-            
-            // Toggle current item
+
             item.classList.toggle('active');
         });
     });
@@ -416,9 +428,8 @@ function initModal() {
         modalConfirm.addEventListener('click', closeModal);
     }
 
-    // Close modal when clicking outside
     if (modal) {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeModal();
             }
@@ -430,6 +441,16 @@ function showDepositOnlyModal(formData, submitMessage = '') {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
     const modalConfirm = document.getElementById('modalConfirm');
+
+    if (!modal || !modalBody) {
+        alert(
+            `입금 안내\n\n` +
+            `입금 금액: ${formData.totalPrice}\n` +
+            `계좌번호: 농협 351-1377-7789-03\n` +
+            `예금주: 문광희`
+        );
+        return;
+    }
 
     if (modalConfirm) {
         modalConfirm.textContent = '확인';
@@ -464,14 +485,13 @@ function showDepositOnlyModal(formData, submitMessage = '') {
 
 function closeModal() {
     const modal = document.getElementById('successModal');
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
 }
 
 // ===================================
 // Utility Functions
 // ===================================
 
-// Format date to Korean format
 function formatDate(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -480,7 +500,6 @@ function formatDate(dateString) {
     return `${year}년 ${month}월 ${day}일`;
 }
 
-// Debounce function for performance
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -497,17 +516,16 @@ function debounce(func, wait) {
 // 사주마당 - 구글 시트 & 이메일 연동
 // ===================================
 
-// 구글 Apps Script 웹앱 URL
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec';
 
-// EmailJS 설정
 const EMAILJS_USER_ID = 'tl5jPJIoiOMEfjMHj';
 const EMAILJS_SERVICE_ID = 'service_9oog4dh';
 const EMAILJS_TEMPLATE_ID = 'template_3uwin9a';
 
-// EmailJS 초기화
-(function() {
-    emailjs.init(EMAILJS_USER_ID);
+(function () {
+    if (typeof emailjs !== 'undefined') {
+        emailjs.init(EMAILJS_USER_ID);
+    }
 })();
 
 // ===================================
@@ -516,7 +534,6 @@ const EMAILJS_TEMPLATE_ID = 'template_3uwin9a';
 
 async function sendToGoogleSheet(formData) {
     try {
-        // 구글 시트용 데이터 포맷 변환
         const sheetData = {
             접수일: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
             상담신청서1: formData.services.join(', '),
@@ -537,19 +554,17 @@ async function sendToGoogleSheet(formData) {
             비고: formData.additionalQuestions
         };
 
-        // 구글 시트로 POST 요청
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(sheetData)
         });
 
         console.log('✅ 구글 시트 전송 완료');
         return true;
-
     } catch (error) {
         console.error('❌ 구글 시트 전송 실패:', error);
         return false;
@@ -562,10 +577,13 @@ async function sendToGoogleSheet(formData) {
 
 async function sendEmailNotification(formData) {
     try {
-        // 서비스 목록을 문자열로 변환
+        if (typeof emailjs === 'undefined') {
+            console.error('❌ emailjs가 로드되지 않았습니다.');
+            return false;
+        }
+
         const servicesText = formData.services.join(', ');
-        
-        // 2인 정보 텍스트 생성
+
         let person2Text = '';
         if (formData.person2) {
             person2Text = `
@@ -576,7 +594,6 @@ async function sendEmailNotification(formData) {
             `.trim();
         }
 
-        // EmailJS 템플릿 파라미터
         const templateParams = {
             to_email: formData.contact.email,
             services: servicesText,
@@ -593,7 +610,6 @@ async function sendEmailNotification(formData) {
             submission_date: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
         };
 
-        // 이메일 발송
         const response = await emailjs.send(
             EMAILJS_SERVICE_ID,
             EMAILJS_TEMPLATE_ID,
@@ -602,7 +618,6 @@ async function sendEmailNotification(formData) {
 
         console.log('✅ 이메일 발송 완료:', response.status, response.text);
         return true;
-
     } catch (error) {
         console.error('❌ 이메일 발송 실패:', error);
         return false;
@@ -614,10 +629,8 @@ async function sendEmailNotification(formData) {
 // ===================================
 
 async function submitFormData(formData) {
-    // 로딩 표시 (선택사항)
     console.log('📤 데이터 전송 중...');
 
-    // 병렬로 구글 시트와 이메일 전송
     const [sheetResult, emailResult] = await Promise.all([
         sendToGoogleSheet(formData),
         sendEmailNotification(formData)
