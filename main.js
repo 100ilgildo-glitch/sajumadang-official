@@ -281,7 +281,7 @@ function initForm() {
                 }
 
                 // 입금 안내만 띄우고 여기서 종료
-                showSuccessModal(formData, submitResult.message);
+                showDepositOnlyModal(formData, submitResult.message);
                 return;
 
             } catch (error) {
@@ -396,6 +396,43 @@ function initModal() {
         modalConfirm.textContent = '안내 확인';
         modalConfirm.addEventListener('click', closeModal);
     }
+
+    function showDepositOnlyModal(formData, submitMessage = '') {
+    const modal = document.getElementById('successModal');
+    const modalBody = document.getElementById('modalBody');
+    const modalConfirm = document.getElementById('modalConfirm');
+
+    if (modalConfirm) {
+        modalConfirm.textContent = '확인';
+    }
+
+    modalBody.innerHTML = `
+        <div style="text-align:left; line-height:1.8;">
+            <p style="color:#8B6F47; font-weight:700; font-size:18px; margin-bottom:12px;">
+                <i class="fas fa-info-circle"></i> 입금 안내
+            </p>
+
+            ${submitMessage ? `<p style="margin-bottom:12px;">${submitMessage}</p>` : ''}
+
+            <p><strong>입금 금액:</strong> ${formData.totalPrice}</p>
+            <p><strong>계좌번호:</strong> 농협 351-1377-7789-03</p>
+            <p><strong>예금주:</strong> 문광희</p>
+
+            <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+
+            <p>1. 위 계좌로 <strong>${formData.totalPrice}</strong>을 입금해주세요.</p>
+            <p>2. 입금 후 <strong>010-9486-4936</strong>으로 연락주시거나 입금자명을 남겨주세요.</p>
+            <p>3. 입금 확인 후 24시간 내 <strong>${formData.contact.email}</strong>로 PDF 리포트를 발송해드립니다.</p>
+
+            <p style="margin-top:14px; color:#8B6F47; font-weight:600;">
+                ※ 현재 상태는 <strong>입금 대기</strong>입니다.
+            </p>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
 
     // Close modal when clicking outside
     if (modal) {
@@ -637,3 +674,4 @@ async function submitFormData(formData) {
 // ===================================
 
 window.submitFormData = submitFormData;
+f
