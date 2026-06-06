@@ -136,22 +136,30 @@ function initForm() {
     
     // Service radio buttons
     const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
-    
-    // Calculate total price
-    function calculateTotal() {
+
+    function getCalculatedTotal() {
         let total = 0;
         let hasTwoPerson = false;
 
         serviceRadios.forEach(radio => {
             if (radio.checked && radio.value !== 'none') {
-                const price = parseInt(radio.dataset.price);
-                total += price;
-                
+                total += Number(radio.dataset.price || 0);
+
                 if (radio.value === '2') {
                     hasTwoPerson = true;
                 }
             }
         });
+
+        return {
+            total,
+            hasTwoPerson
+        };
+    }
+    
+    // Calculate total price
+    function calculateTotal() {
+        const { total, hasTwoPerson } = getCalculatedTotal();
 
         // Show/hide person 2 section
         if (hasTwoPerson) {
@@ -168,7 +176,9 @@ function initForm() {
             document.getElementById('birth_date2').required = false;
         }
 
-        totalPriceElement.textContent = total.toLocaleString('ko-KR') + '원';
+        if (totalPriceElement) {
+            totalPriceElement.textContent = total.toLocaleString('ko-KR') + '원';
+        }
     }
 
     // Add event listeners to all radio buttons
@@ -306,9 +316,18 @@ function initForm() {
 }
 
 function collectFormData() {
+    const selectedServiceRadios = document.querySelectorAll('input[type="radio"][data-price]');
+    let computedTotal = 0;
+
+    selectedServiceRadios.forEach(radio => {
+        if (radio.checked && radio.value !== 'none') {
+            computedTotal += Number(radio.dataset.price || 0);
+        }
+    });
+
     const data = {
         services: [],
-        totalPrice: document.getElementById('totalPrice').textContent,
+        totalPrice: computedTotal.toLocaleString('ko-KR') + '원',
         person1: {
             name: document.getElementById('name1').value,
             gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
@@ -393,11 +412,21 @@ function initModal() {
     }
 
     if (modalConfirm) {
-        modalConfirm.textContent = '안내 확인';
+        modalConfirm.textContent = '확인';
         modalConfirm.addEventListener('click', closeModal);
     }
 
-    function showDepositOnlyModal(formData, submitMessage = '') {
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+}
+
+function showDepositOnlyModal(formData, submitMessage = '') {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
     const modalConfirm = document.getElementById('modalConfirm');
@@ -430,66 +459,6 @@ function initModal() {
         </div>
     `;
 
-    modal.classList.add('active');
-}
-
-
-    // Close modal when clicking outside
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-    }
-}
-
-function showSuccessModal(formData, submitMessage = '') {
-    const modal = document.getElementById('successModal');
-    const modalBody = document.getElementById('modalBody');
-
-    let html = `
-        <p style="color: #8B6F47; font-weight: 700; margin-bottom: 1rem;">
-            <i class="fas fa-info-circle"></i> 신청이 접수되었습니다. 현재 단계는 <strong>입금 안내</strong>입니다.
-        </p>
-        ${submitMessage ? `<p style="margin-bottom: 1rem;">${submitMessage}</p>` : ''}
-        <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
-        <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
-        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
-        <p><strong>신청자 정보 (1인):</strong><br>
-        이름: ${formData.person1.name} (${formData.person1.gender})<br>
-        생년월일: ${formData.person1.birthDate} (${formData.person1.birthType})<br>
-        태어난 시간: ${formData.person1.birthTime}</p>
-    `;
-
-    if (formData.person2) {
-        html += `
-            <p><strong>신청자 정보 (2인):</strong><br>
-            이름: ${formData.person2.name} (${formData.person2.gender})<br>
-            생년월일: ${formData.person2.birthDate} (${formData.person2.birthType})<br>
-            태어난 시간: ${formData.person2.birthTime}</p>
-        `;
-    }
-
-    html += `
-        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
-        <p><strong>연락처:</strong><br>
-        전화: ${formData.contact.phone}<br>
-        이메일: ${formData.contact.email}</p>
-        <p><strong>추가 질문:</strong><br>${formData.additionalQuestions}</p>
-        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
-        <p style="color: #8B6F47; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> 입금 안내:<br>
-        <small style="font-weight: normal;">
-        1. 농협 351-1377-7789-03 (문광희)로 ${formData.totalPrice}을 입금해주세요<br>
-        2. 입금 후 010-9486-4936으로 연락주시거나 입금자명을 남겨주세요<br>
-        3. 입금 확인 후 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다<br><br>
-        ※ 현재 단계는 결제 완료가 아니라 <strong>입금 대기</strong> 상태입니다.
-        </small>
-        </p>
-    `;
-
-    modalBody.innerHTML = html;
     modal.classList.add('active');
 }
 
@@ -674,4 +643,3 @@ async function submitFormData(formData) {
 // ===================================
 
 window.submitFormData = submitFormData;
-f
