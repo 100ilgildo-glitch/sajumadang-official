@@ -3,7 +3,7 @@
 // ===================================
 
 // Wait for DOM to load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initNavigation();
     initScrollEffects();
     initForm();
@@ -21,33 +21,30 @@ function initNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     const navbar = document.getElementById('navbar');
 
-    // Mobile menu toggle
     if (navToggle) {
-        navToggle.addEventListener('click', function() {
+        navToggle.addEventListener('click', function () {
             this.classList.toggle('active');
-            navMenu.classList.toggle('active');
+            if (navMenu) navMenu.classList.toggle('active');
         });
     }
 
-    // Close mobile menu when clicking on a link
     navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            navToggle.classList.remove('active');
-            navMenu.classList.remove('active');
+        link.addEventListener('click', function () {
+            if (navToggle) navToggle.classList.remove('active');
+            if (navMenu) navMenu.classList.remove('active');
         });
     });
 
-    // Smooth scrolling for navigation links
     navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             const targetSection = document.querySelector(targetId);
-            
-            if (targetSection) {
+
+            if (targetSection && navbar) {
                 const navbarHeight = navbar.offsetHeight;
                 const targetPosition = targetSection.offsetTop - navbarHeight;
-                
+
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
@@ -56,8 +53,9 @@ function initNavigation() {
         });
     });
 
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
+        if (!navbar) return;
+
         if (window.scrollY > 100) {
             navbar.classList.add('scrolled');
         } else {
@@ -71,11 +69,10 @@ function initNavigation() {
 // ===================================
 
 function initScrollEffects() {
-    // Scroll to top button
     const scrollToTopBtn = document.getElementById('scrollToTop');
-    
+
     if (scrollToTopBtn) {
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', function () {
             if (window.scrollY > 300) {
                 scrollToTopBtn.classList.add('visible');
             } else {
@@ -83,7 +80,7 @@ function initScrollEffects() {
             }
         });
 
-        scrollToTopBtn.addEventListener('click', function() {
+        scrollToTopBtn.addEventListener('click', function () {
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -91,13 +88,12 @@ function initScrollEffects() {
         });
     }
 
-    // Intersection Observer for fade-in animations
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
     };
 
-    const observer = new IntersectionObserver(function(entries) {
+    const observer = new IntersectionObserver(function (entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.style.opacity = '1';
@@ -106,7 +102,6 @@ function initScrollEffects() {
         });
     }, observerOptions);
 
-    // Observe service cards
     document.querySelectorAll('.service-card').forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
@@ -114,7 +109,6 @@ function initScrollEffects() {
         observer.observe(card);
     });
 
-    // Observe process steps
     document.querySelectorAll('.process-step').forEach(step => {
         step.style.opacity = '0';
         step.style.transform = 'translateY(30px)';
@@ -128,63 +122,61 @@ function initScrollEffects() {
 // ===================================
 
 function initForm() {
-    const form = document.getElementById('applicationForm');
+    const form = document.getElementById('emailForm');
     const totalPriceElement = document.getElementById('totalPrice');
     const person2Section = document.getElementById('person2Section');
-    
-    // Service radio buttons
+
+    if (!form || !totalPriceElement || !person2Section) return;
+
     const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
-    
-    // Calculate total price
+
     function calculateTotal() {
         let total = 0;
         let hasTwoPerson = false;
 
         serviceRadios.forEach(radio => {
             if (radio.checked && radio.value !== 'none') {
-                const price = parseInt(radio.dataset.price);
+                const price = parseInt(radio.dataset.price, 10);
                 total += price;
-                
+
                 if (radio.value === '2') {
                     hasTwoPerson = true;
                 }
             }
         });
 
-        // Show/hide person 2 section
+        const name2 = document.getElementById('name2');
+        const gender2 = document.getElementById('gender2');
+        const birthDate2 = document.getElementById('birth_date2');
+
         if (hasTwoPerson) {
             person2Section.style.display = 'block';
-            // Make person 2 fields required
-            document.getElementById('name2').required = true;
-            document.getElementById('gender2').required = true;
-            document.getElementById('birth_date2').required = true;
+            if (name2) name2.required = true;
+            if (gender2) gender2.required = true;
+            if (birthDate2) birthDate2.required = true;
         } else {
             person2Section.style.display = 'none';
-            // Make person 2 fields optional
-            document.getElementById('name2').required = false;
-            document.getElementById('gender2').required = false;
-            document.getElementById('birth_date2').required = false;
+            if (name2) name2.required = false;
+            if (gender2) gender2.required = false;
+            if (birthDate2) birthDate2.required = false;
         }
 
         totalPriceElement.textContent = total.toLocaleString('ko-KR') + '원';
     }
 
-    // Add event listeners to all radio buttons
     serviceRadios.forEach(radio => {
         radio.addEventListener('change', calculateTotal);
     });
 
-    // Also add listeners to "none" options
     document.querySelectorAll('input[type="radio"][value="none"]').forEach(radio => {
         radio.addEventListener('change', calculateTotal);
     });
 
-    // Phone number formatting
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
-        phoneInput.addEventListener('input', function(e) {
+        phoneInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/[^\d]/g, '');
-            
+
             if (value.length <= 3) {
                 e.target.value = value;
             } else if (value.length <= 7) {
@@ -195,14 +187,13 @@ function initForm() {
         });
     }
 
-    // Time unknown checkboxes
     const timeUnknown1 = document.getElementById('time_unknown1');
     const birthTime1 = document.getElementById('birth_time1');
     const timeUnknown2 = document.getElementById('time_unknown2');
     const birthTime2 = document.getElementById('birth_time2');
 
     if (timeUnknown1 && birthTime1) {
-        timeUnknown1.addEventListener('change', function() {
+        timeUnknown1.addEventListener('change', function () {
             birthTime1.disabled = this.checked;
             if (this.checked) {
                 birthTime1.value = '';
@@ -211,7 +202,7 @@ function initForm() {
     }
 
     if (timeUnknown2 && birthTime2) {
-        timeUnknown2.addEventListener('change', function() {
+        timeUnknown2.addEventListener('change', function () {
             birthTime2.disabled = this.checked;
             if (this.checked) {
                 birthTime2.value = '';
@@ -219,79 +210,138 @@ function initForm() {
         });
     }
 
-    // Form submission
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validate that at least one service is selected
-            const hasSelectedService = Array.from(serviceRadios).some(radio => 
-                radio.checked && radio.value !== 'none'
-            );
+    window.calculateApplicationTotal = calculateTotal;
+    window.validateApplicationForm = validateApplicationForm;
+    window.collectFormData = collectFormData;
+    window.resetApplicationFormUI = function () {
+        form.reset();
+        calculateTotal();
 
-            if (!hasSelectedService) {
-                alert('최소 1개 이상의 서비스를 선택해주세요.');
-                return;
-            }
+        const checkbox = document.getElementById('privacyAgree');
+        const submitBtn = document.getElementById('submitBtn');
 
-            // Validate email format
-            const email = document.getElementById('email').value;
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                alert('올바른 이메일 주소를 입력해주세요.');
-                return;
-            }
+        if (checkbox && submitBtn) {
+            submitBtn.disabled = !checkbox.checked;
+        }
 
-            // Validate phone number
-            const phone = document.getElementById('phone').value;
-            const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
-            if (!phonePattern.test(phone)) {
-                alert('올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)');
-                return;
-            }
+        if (person2Section) {
+            person2Section.style.display = 'none';
+        }
+    };
 
-            // Collect form data
-            const formData = collectFormData();
-            
-            // Show success modal
-            showSuccessModal(formData);
-            
-            // Reset form
-            form.reset();
-            calculateTotal();
-        });
-    }
-
-    // Initial calculation
     calculateTotal();
 }
+
+function validateApplicationForm() {
+    const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
+    const hasSelectedService = Array.from(serviceRadios).some(radio =>
+        radio.checked && radio.value !== 'none'
+    );
+
+    if (!hasSelectedService) {
+        return {
+            valid: false,
+            message: '최소 1개 이상의 서비스를 선택해주세요.'
+        };
+    }
+
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+
+    const email = emailInput ? emailInput.value.trim() : '';
+    const phone = phoneInput ? phoneInput.value.trim() : '';
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+        return {
+            valid: false,
+            message: '올바른 이메일 주소를 입력해주세요.'
+        };
+    }
+
+    const phonePattern = /^\d{3}-\d{4}-\d{4}$/;
+    if (!phonePattern.test(phone)) {
+        return {
+            valid: false,
+            message: '올바른 전화번호 형식을 입력해주세요. (예: 010-0000-0000)'
+        };
+    }
+
+    return {
+        valid: true,
+        message: ''
+    };
+}
+
+    // Collect form data
+const formData = collectFormData();
+
+fetch("https://script.google.com/macros/s/AKfycbw_fkb-c11S_xOqnl0SY1tULevr_FW52TadW--KrHGwa7KTfKkK2PEm7x-CPaak36mg/exec", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        services: formData.services.join(", "),
+        name1: formData.person1.name,
+        gender1: formData.person1.gender,
+        birthDate1: formData.person1.birthDate,
+        birthTime1: formData.person1.birthTime,
+
+        name2: formData.person2 ? formData.person2.name : "",
+        gender2: formData.person2 ? formData.person2.gender : "",
+        birthDate2: formData.person2 ? formData.person2.birthDate : "",
+        birthTime2: formData.person2 ? formData.person2.birthTime : "",
+
+        tel: formData.contact.phone,
+        email: formData.contact.email,
+        additionalQuestions: formData.additionalQuestions
+    })
+})
+.then(response => response.json())
+.then(data => {
+
+    showSuccessModal(formData);
+
+    form.reset();
+    calculateTotal();
+
+})
+.catch(error => {
+
+    alert("상담신청 저장에 실패했습니다.");
+
+    console.error(error);
+
+});
 
 function collectFormData() {
     const data = {
         services: [],
-        totalPrice: document.getElementById('totalPrice').textContent,
+        totalPrice: document.getElementById('totalPrice')?.textContent || '0원',
         person1: {
-            name: document.getElementById('name1').value,
-            gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date1').value,
-            birthTime: document.getElementById('time_unknown1').checked ? '시간 미상' : (document.getElementById('birth_time1').value || '미입력')
+            name: document.getElementById('name1')?.value || '',
+            gender: document.getElementById('gender1')?.value === 'male' ? '남성' : '여성',
+            birthType: document.getElementById('birth_type1')?.value === 'solar' ? '양력' : '음력',
+            birthDate: document.getElementById('birth_date1')?.value || '',
+            birthTime: document.getElementById('time_unknown1')?.checked
+                ? '시간 미상'
+                : (document.getElementById('birth_time1')?.value || '미입력')
         },
         contact: {
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value
+            phone: document.getElementById('phone')?.value || '',
+            email: document.getElementById('email')?.value || ''
         },
-        additionalQuestions: document.getElementById('additional_questions').value || '없음'
+        additionalQuestions: document.getElementById('additional_questions')?.value || '없음'
     };
 
-    // Collect selected services
     const serviceMapping = {
-        'service_lifelong': '평생사주',
-        'service_newyear': '2026년 신년운',
-        'service_wealth': '재물운',
-        'service_health': '건강운',
-        'service_career': '직업운',
-        'service_compatibility': '궁합'
+        service_lifelong: '평생사주',
+        service_newyear: '2026년 신년운',
+        service_wealth: '재물운',
+        service_health: '건강운',
+        service_career: '직업운',
+        service_compatibility: '궁합'
     };
 
     Object.keys(serviceMapping).forEach(key => {
@@ -302,14 +352,15 @@ function collectFormData() {
         }
     });
 
-    // Check if person 2 section is visible
-    if (document.getElementById('person2Section').style.display === 'block') {
+    if (document.getElementById('person2Section')?.style.display === 'block') {
         data.person2 = {
-            name: document.getElementById('name2').value,
-            gender: document.getElementById('gender2').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type2').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date2').value,
-            birthTime: document.getElementById('time_unknown2').checked ? '시간 미상' : (document.getElementById('birth_time2').value || '미입력')
+            name: document.getElementById('name2')?.value || '',
+            gender: document.getElementById('gender2')?.value === 'male' ? '남성' : '여성',
+            birthType: document.getElementById('birth_type2')?.value === 'solar' ? '양력' : '음력',
+            birthDate: document.getElementById('birth_date2')?.value || '',
+            birthTime: document.getElementById('time_unknown2')?.checked
+                ? '시간 미상'
+                : (document.getElementById('birth_time2')?.value || '미입력')
         };
     }
 
@@ -322,19 +373,17 @@ function collectFormData() {
 
 function initFAQ() {
     const faqItems = document.querySelectorAll('.faq-item');
-    
+
     faqItems.forEach(item => {
         const question = item.querySelector('.faq-question');
-        
-        question.addEventListener('click', function() {
-            // Close other items
+
+        question.addEventListener('click', function () {
             faqItems.forEach(otherItem => {
                 if (otherItem !== item && otherItem.classList.contains('active')) {
                     otherItem.classList.remove('active');
                 }
             });
-            
-            // Toggle current item
+
             item.classList.toggle('active');
         });
     });
@@ -357,9 +406,8 @@ function initModal() {
         modalConfirm.addEventListener('click', closeModal);
     }
 
-    // Close modal when clicking outside
     if (modal) {
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeModal();
             }
@@ -370,6 +418,8 @@ function initModal() {
 function showSuccessModal(formData) {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
+
+    if (!modal || !modalBody) return;
 
     let html = `
         <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
@@ -413,14 +463,15 @@ function showSuccessModal(formData) {
 
 function closeModal() {
     const modal = document.getElementById('successModal');
-    modal.classList.remove('active');
+    if (modal) {
+        modal.classList.remove('active');
+    }
 }
 
 // ===================================
 // Utility Functions
 // ===================================
 
-// Format date to Korean format
 function formatDate(dateString) {
     const date = new Date(dateString);
     const year = date.getFullYear();
@@ -429,7 +480,6 @@ function formatDate(dateString) {
     return `${year}년 ${month}월 ${day}일`;
 }
 
-// Debounce function for performance
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -441,4 +491,3 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
-
