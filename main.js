@@ -776,41 +776,44 @@ async function sendToGoogleSheet(data) {
 /* =====================================================
    ② EmailJS (신청자 확인 이메일 발송)
 ===================================================== */
-async function sendEmail(data) {
-  /* EmailJS 템플릿 변수명과 일치시킴 */
-  const params = {
-    /* 수신자 */
-    to_email:      data.이메일,
-    to_name:       data.이름1,
+ // 각 서비스별 선택값 (선택안함이면 "선택안함" 표시)
+    function svcVal(radioName) {
+      var val   = getRadio(radioName);
+      if (!val || val === "선택안함") return "선택안함";
+      var price = PRICE[radioName][val] || 0;
+      return val + " (" + price.toLocaleString() + "원)";
+    }
 
-    /* 접수 정보 */
-    접수일:        data.접수일,
-    합계금액:      data.합계금액,
-    전화번호:      data.전화번호,
-    이메일:        data.이메일,
-    비고:          data.비고 || "없음",
+    return emailjs.send(EJS_SVC, EJS_TMPL, {
+      to_name:     data["이름1"],
+      to_email:    data["이메일"],
+      접수일:      data["접수일"],
+      합계금액:    data["합계금액"],
+      전화번호:    data["전화번호"],
+      이메일:      data["이메일"],
+      상담신청서1: data["상담신청서1"],
+      상담신청서2: data["상담신청서2"],
 
-    /* 선택 서비스 */
-    상담신청서1:   data.상담신청서1 || "없음",
-    상담신청서2:   data.상담신청서2 || "없음",
+      // 서비스별 개별 선택값 → EmailJS 템플릿 {{변수명}} 과 일치
+      평생사주:    svcVal("svc_paengSaju"),
+      신년운:      svcVal("svc_sinnyeonun"),
+      재물운:      svcVal("svc_jaemurun"),
+      건강운:      svcVal("svc_geongangun"),
+      직업운:      svcVal("svc_jikeopun"),
+      궁합:        svcVal("svc_gunghap"),
 
-    /* 1번째 분 */
-    이름1:         data.이름1,
-    성별1:         data.성별1,
-    생년월일1:     data.생년월일1,
-    시간1:         data.시간1,
-    양력음력1:     data.양력음력1,
-
-    /* 2번째 분 */
-    이름2:         data.이름2 || "해당없음",
-    성별2:         data.성별2 || "해당없음",
-    생년월일2:     data.생년월일2 || "해당없음",
-    시간2:         data.시간2 || "해당없음",
-    양력음력2:     data.양력음력2 || "해당없음"
-  };
-
-  return emailjs.send(EJS_SVC, EJS_TMPL, params);
-}
+      이름1:       data["이름1"],
+      성별1:       data["성별1"],
+      생년월일1:   data["생년월일1"],
+      시간1:       data["시간1"],
+      양력음력1:   data["양력/음력1"],
+      이름2:       data["이름2"]     || "해당없음",
+      성별2:       data["성별2"]     || "해당없음",
+      생년월일2:   data["생년월일2"] || "해당없음",
+      시간2:       data["시간2"]     || "해당없음",
+      양력음력2:   data["양력/음력2"]|| "해당없음",
+      비고:        data["비고"]      || "없음"
+    });
 
 /* =====================================================
    버튼 상태 토글
