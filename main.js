@@ -752,7 +752,7 @@ function collectData() {
     생년월일2:    has2Person ? document.getElementById("birth2").value : "",        // K열
     시간2:        has2Person ? document.getElementById("time2").value : "",         // L열
     양력음력2:    has2Person ? getRadioValue("양력음력2") : "",       // M열
-    합계금액:     document.getElementById("hiddenTotal").value,       // N열
+    합계금액:     document.getElementById("합계금액").value,       // N열
     전화번호:     document.getElementById("phone").value.trim(),      // O열
     이메일:       document.getElementById("email").value.trim(),      // P열
     비고:         document.getElementById("remark").value.trim()      // Q열
