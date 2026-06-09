@@ -262,8 +262,26 @@ function initForm() {
         });
     }
 
-    // Initial calculation
-    calculateTotal();
+   function calculateTotal() {
+  let total = 0;
+  const parts = [];
+
+  // 선택된 서비스 항목 합산
+  document.querySelectorAll('input[name="services"]:checked').forEach(service => {
+    const price = parseInt(service.dataset.price, 10);
+    total += price;
+    parts.push(service.value);
+  });
+
+  // 결과 표시
+  const totalPriceElement = document.getElementById("totalPrice");
+  totalPriceElement.textContent = "합계 금액: " + total.toLocaleString() + "원";
+
+  // formData에 저장할 경우
+  return {
+    totalPrice: total,
+    services: parts
+  };
 }
 
 function collectFormData() {
@@ -367,28 +385,35 @@ function initModal() {
     }
 }
 
-function showSuccessModal(formData) {
+function showSuccessModal(formData, receiptNumber) {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
 
-    let html = `
-        <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
-        <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
-        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
-        <p><strong>신청자 정보 (1인):</strong><br>
-        이름: ${formData.person1.name} (${formData.person1.gender})<br>
-        생년월일: ${formData.person1.birthDate} (${formData.person1.birthType})<br>
-        태어난 시간: ${formData.person1.birthTime}</p>
-    `;
+let html = `
+    <p><strong>접수일:</strong> ${formData.receiptDate}</p>
+    <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
+    <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
+    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+    <p><strong>신청자 정보 (1인):</strong><br>
+    이름: ${formData.person1.name}<br>
+    성별: ${formData.person1.gender} (남/여)<br>
+    생년월일: ${formData.person1.birthDate}<br>
+    양력/음력: ${formData.person1.birthType}<br>
+    태어난 시간: ${formData.person1.birthTime}<br>
+    비고: ${formData.person1.note || ''}</p>
+`;
 
-    if (formData.person2) {
-        html += `
-            <p><strong>신청자 정보 (2인):</strong><br>
-            이름: ${formData.person2.name} (${formData.person2.gender})<br>
-            생년월일: ${formData.person2.birthDate} (${formData.person2.birthType})<br>
-            태어난 시간: ${formData.person2.birthTime}</p>
-        `;
-    }
+if (formData.person2) {
+    html += `
+        <p><strong>신청자 정보 (2인):</strong><br>
+        이름: ${formData.person2.name}<br>
+        성별: ${formData.person2.gender} (남/여)<br>
+        생년월일: ${formData.person2.birthDate}<br>
+        양력/음력: ${formData.person2.birthType}<br>
+        태어난 시간: ${formData.person2.birthTime}<br>
+        비고: ${formData.person2.note || ''}</p>
+    `;
+}
 
     html += `
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
@@ -398,11 +423,14 @@ function showSuccessModal(formData) {
         <p><strong>추가 질문:</strong><br>${formData.additionalQuestions}</p>
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
         <p style="color: #8B6F47; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> 다음 단계:<br>
+        <i class="fas fa-info-circle"></i> 현재 상태: 접수 완료<br>
         <small style="font-weight: normal;">
+        신청이 정상적으로 접수되었습니다.<br>
+        접수 번호를 꼭 메모해두세요: ${receiptNumber}<br><br>
+        다음 단계:<br>
         1. 농협 351-1377-7789-03 (문광희)로 ${formData.totalPrice}을 입금해주세요<br>
         2. 입금 후 010-9486-4936으로 연락주시거나 입금자명을 남겨주세요<br>
-        3. 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
+        3. 입금 확인 후 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
         </small>
         </p>
     `;
@@ -442,12 +470,29 @@ function debounce(func, wait) {
     };
 }
 
-    /* ── EmailJS 초기화 ── */
+/* =====================================================
+   개인정보 동의 토글
+===================================================== */
+function togglePrivacy() {
+  const el = document.getElementById("privacyDetail");
+  const btn = document.querySelector(".btn-privacy-toggle");
+  if (el.style.display === "none") {
+    el.style.display = "block";
+    btn.textContent = "접기 ▴";
+  } else {
+    el.style.display = "none";
+    btn.textContent = "내용 보기 ▾";
+  }
+}
+
+/* ── EmailJS 초기화 ── */
 emailjs.init("tl5jPJIoiOMEfjMHj");
 
 /* ── 상수 ── */
-const GAS_URL    = "https://script.google.com/macros/s/AKfycbzBxoQ20L1bRdvs5Z4j_7oDx8NZigz6fPZn_LQctUxbnrv0T0MRQj7OCgFxJKsuoarx/exec";
-const EJS_SVC    = "service_9oog4dh";
+                  
+const GAS_URL    =                  
+"https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec";
+ const EJS_SVC    = "service_9oog4dh";
 const EJS_TMPL   = "template_3uwin9a";
 
 /* ── 서비스 가격표 ── */
@@ -462,12 +507,12 @@ const PRICE = {
 
 /* ── 서비스 한국어 이름 ── */
 const SVC_LABEL = {
-  svc_paengSaju:  "1.평생사주",
-  svc_sinnyeonun: "2.신년운",
-  svc_jaemurun:   "3.재물운",
-  svc_geongangun: "4.건강운",
-  svc_jikeopun:   "5.직업운",
-  svc_gunghap:    "6.궁합"
+  svc_paengSaju:  "평생사주",
+  svc_sinnyeonun: "신년운",
+  svc_jaemurun:   "재물운",
+  svc_geongangun: "건강운",
+  svc_jikeopun:   "직업운",
+  svc_gunghap:    "궁합"
 };
 
 /* =====================================================
@@ -480,8 +525,6 @@ function getNowStr() {
        + `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-
-
 /* =====================================================
    선택된 라디오 값 가져오기
 ===================================================== */
@@ -491,123 +534,72 @@ function getRadioValue(name) {
 }
 
 /* =====================================================
-   합계 금액 계산 + 화면 업데이트
+   합계 계산 함수
 ===================================================== */
-function calcTotal() {
-  let total = 0;
-  const parts = [];   // 선택된 서비스 목록 (시트 A열용)
 
-   Object.keys(PRICE).forEach(function (name) {
-    var val = getRadio(name);
-    if (!val || val === "선택안함") return;
 
-    var price = PRICE[name][val] || 0;
+  // 선택된 서비스 항목 합산
+  document.querySelectorAll('input[name="services"]:checked').forEach(service => {
+    const price = parseInt(service.dataset.price, 10);
     total += price;
-
-    // 예: "1.평생사주 1인(26,600원)"  또는  "6.궁합 2인(35,000원)"
-    var line = SVC_NAME[name] + " " + val + "(" + price.toLocaleString() + "원)";
-    if (val === "1인") list1.push(line);
-    else               list2.push(line);
+    parts.push(service.value);
   });
 
-  // 선택 안 된 서비스도 "선택안함" 으로 전체 목록 기록 (B열/H열 한눈에 확인용)
-  var full1 = [], full2 = [];
-  Object.keys(PRICE).forEach(function (name) {
-    var val   = getRadio(name);
-    var price = (val && val !== "선택안함") ? PRICE[name][val] || 0 : 0;
-    var priceStr = price > 0 ? "(" + price.toLocaleString() + "원)" : "";
+  // 결과 표시
+  const totalPriceElement = document.getElementById("totalPrice");
+  totalPriceElement.textContent = "합계 금액: " + total.toLocaleString() + "원";
 
-    if (val === "1인") {
-      full1.push(SVC_NAME[name] + " ✔1인" + priceStr);
-    } else if (val === "2인") {
-      full2.push(SVC_NAME[name] + " ✔2인" + priceStr);
-    }
-    // 선택안함은 저장 안 함 (선택된 것만 저장)
-  });
+  // formData에 활용할 수 있도록 반환
+  return {
+    totalPrice: total,
+    services: parts
+  };
+}
 
-  /* =====================================================
+/* =====================================================
    페이지 로드 시 초기화 + 이벤트 바인딩
 ===================================================== */
 document.addEventListener("DOMContentLoaded", function () {
+  // 합계 초기 계산
+  calculateTotal();
 
-  /* 합계 초기 계산 */
-  calcTotal();
-
-  /* 서비스 라디오 변경 → 합계 자동 계산 */
+  // 서비스 라디오 변경 → 합계 자동 계산
   document.getElementById("serviceList").addEventListener("change", function (e) {
     if (e.target.type === "radio") {
-      calcTotal();
+      calculateTotal();
     }
   });
 
-  /* 폼 제출 */
+  // 폼 제출
   document.getElementById("consultForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     hideError();
 
     if (!validateForm()) return;
 
+    // 데이터 수집
     const data = collectData();
     setLoading(true);
 
     try {
+      // 1. Google Sheet 저장
       await sendToGoogleSheet(data);
+
+      // 2. EmailJS 확인 메일 발송
       await sendEmail(data);
 
+      // 3. 성공 메시지 표시
       document.getElementById("consultForm").style.display = "none";
       document.getElementById("successMsg").style.display = "block";
       document.getElementById("successMsg").scrollIntoView({ behavior: "smooth", block: "center" });
-
-    } 
-   
-    
-
-    /* =====================================================
-   페이지 로드 시 초기화 + 이벤트 바인딩
-===================================================== */
-  document.addEventListener("DOMContentLoaded", function () {
-
-  /* 합계 초기 계산 */
-  calcTotal();
-
-  /* 서비스 라디오 변경 → 합계 자동 계산 */
-  document.getElementById("serviceList").addEventListener("change", function (e) {
-    if (e.target.type === "radio") {
-      calcTotal();
+    } catch (error) {
+      console.error("오류 발생:", error);
+      alert("접수 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
     }
   });
-
-  /* 폼 제출 */
-  document.getElementById("consultForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    hideError();
-
-    if (!validateForm()) return;
-
-    const data = collectData();
-    setLoading(true);
-
-    try {
-      await sendToGoogleSheet(data);
-      await sendEmail(data);
-
-      document.getElementById("consultForm").style.display = "none";
-      document.getElementById("successMsg").style.display = "block";
-      document.getElementById("successMsg").scrollIntoView({ behavior: "smooth", block: "center" });
-
-    then(function () {
-    // ② EmailJS 발송 완료 → 콘솔 확인용
-    console.log("사주마당: 구글시트 저장 + 이메일 발송 완료");
-  })
-  .catch(function (err) {
-    console.error("사주마당 GAS/EmailJS 오류:", err);
-  });
-}
-
-     /* 화면 갱신 */
-  const wonStr = formatWon(total);
-  document.getElementById("totalAmount").textContent = wonStr;
-  document.getElementById("hidden_합계금액").value = wonStr;
+});
 
   /* 서비스 요약 (1인 / 2인 항목 분리) */
   const sel1 = []; // 1인 서비스
@@ -844,78 +836,4 @@ function resetForm() {
   calcTotal();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
-/* =====================================================
-   폼 제출 핸들러
-===================================================== */
-document.getElementById("consultForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  hideError();
-
-  /* 유효성 검사 */
-  if (!validateForm()) return;
-
-  /* 데이터 수집 */
-  const data = collectData();
-
-  /* 로딩 시작 */
-  setLoading(true);
-
-  try {
-    /* ① 구글 시트 저장 */
-    await sendToGoogleSheet(data);
-
-    /* ② 이메일 발송 */
-    await sendEmail(data);
-
-    /* 완료 처리 */
-    document.getElementById("consultForm").style.display = "none";
-    document.getElementById("successMsg").style.display = "block";
-    document.getElementById("successMsg").scrollIntoView({ behavior: "smooth", block: "center" });
-
- /* =====================================================
-   페이지 로드 시 초기화 + 이벤트 바인딩
-===================================================== */
-document.addEventListener("DOMContentLoaded", function () {
-
-  /* 합계 초기 계산 */
-  calcTotal();
-
-  /* 서비스 라디오 변경 → 합계 자동 계산 */
-  document.getElementById("serviceList").addEventListener("change", function (e) {
-    if (e.target.type === "radio") {
-      calcTotal();
-    }
-  });
-
-  /* 폼 제출 */
-  document.getElementById("consultForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    hideError();
-
-    if (!validateForm()) return;
-
-    const data = collectData();
-    setLoading(true);
-
-    try {
-      await sendToGoogleSheet(data);
-      await sendEmail(data);
-
-      document.getElementById("consultForm").style.display = "none";
-      document.getElementById("successMsg").style.display = "block";
-      document.getElementById("successMsg").scrollIntoView({ behavior: "smooth", block: "center" });
-
-    } catch (err) {
-      console.error("신청 오류:", err);
-      showError("신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
-    } finally {
-      setLoading(false);
-    }
-  });
-
-});
-
-
-    
 
