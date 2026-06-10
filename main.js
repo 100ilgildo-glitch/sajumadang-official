@@ -470,7 +470,7 @@ function debounce(func, wait) {
     };
 }
 
-/* ── EmailJS 초기화 ── */
+/* ── EmailJS 초기화 ── */ 
 emailjs.init("tl5jPJIoiOMEfjMHj");
 const GAS_URL    =                  
 "https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec";
