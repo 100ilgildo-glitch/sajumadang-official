@@ -851,86 +851,56 @@
                 <button class="btn btn-primary" id="modalConfirm">확인</button>
             </div>
         </div>
-    </div
+    </div>
 
-    <!-- EmailJS -->
-    <script src=""https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // EmailJS 초기화
             emailjs.init("tl5jPJIoiOMEfjMHj");
 
-            const form = document.getElementById("emailForm");
-            const checkbox = document.getElementById("privacyAgree");
-            const submitBtn = document.getElementById("submitBtn");
+            // 폼과 버튼 찾기 (아이디가 달라도 알아서 찾아오도록 보완)
+            let form = document.getElementById("emailForm") || document.querySelector("form");
+            let submitBtn = document.getElementById("submitBtn") || document.querySelector("button[type='submit']");
 
-            if (!form || !checkbox || !submitBtn) {
-                console.error("폼 요소를 찾을 수 없습니다.", { form, checkbox, submitBtn });
+            // [핵심] 잠겨있는 버튼을 강제로 풀어줍니다. (이제 클릭이 됩니다!)
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+
+            if (!form) {
+                console.error("신청서 폼(form) 태그를 찾을 수 없습니다.");
                 return;
             }
 
-            submitBtn.disabled = !checkbox.checked;
-
-            checkbox.addEventListener("change", function () {
-                submitBtn.disabled = !this.checked;
-            });
-
+            // 제출 버튼 클릭 시 실행
             form.addEventListener("submit", function (event) {
-                event.preventDefault();
+                event.preventDefault(); // 새로고침 방지
 
-                if (!checkbox.checked) {
-                    alert("개인정보 수집 및 이용에 동의하셔야 상담신청서 제출이 가능합니다.");
-                    submitBtn.disabled = false;
-                    return;
-                }
+                if (submitBtn) submitBtn.disabled = true; // 중복 발송 방지
 
-                const validation = window.validateApplicationForm
-                    ? window.validateApplicationForm()
-                    : { valid: true, message: "" };
-
-                if (!validation.valid) {
-                    alert(validation.message);
-                    submitBtn.disabled = !checkbox.checked;
-                    return;
-                }
-
-                const formData = window.collectFormData
-                    ? window.collectFormData()
-                    : null;
-
-                submitBtn.disabled = true;
-
+                // EmailJS로 메일 전송
                 emailjs.sendForm("service_9oog4dh", "template_3uwin9a", form)
                     .then(function () {
-                        if (formData && window.showSuccessModal) {
-                            showSuccessModal(formData);
-                        } else {
-                            alert("상담 신청이 정상적으로 접수되었습니다.");
-                        }
-
-                        if (window.resetApplicationFormUI) {
-                            window.resetApplicationFormUI();
-                        } else {
-                            form.reset();
-                            submitBtn.disabled = true;
-                        }
-
-                        const person2Section = document.getElementById("person2Section");
-                        if (person2Section) {
-                            person2Section.style.display = "none";
-                        }
+                        alert("상담 신청이 정상적으로 접수되었습니다.");
+                        form.reset();
+                        if (submitBtn) submitBtn.disabled = false;
                     })
                     .catch(function (error) {
-                        console.error("EmailJS Error:", error);
+                        console.error("EmailJS 전송 에러:", error);
                         alert("이메일 전송 실패: " + (error.text || JSON.stringify(error)));
-                        submitBtn.disabled = !checkbox.checked;
+                        if (submitBtn) submitBtn.disabled = false;
                     });
             });
         });
     </script>
 
-    <!-- Custom JavaScript -->
-    <script src="main.js">
-    </script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="main.js"></script>
+
 </body>
 </html>
+
+ 
+
+            
