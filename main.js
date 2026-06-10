@@ -691,7 +691,8 @@ function validateForm() {
       document.getElementById("birth2").focus();
       return false;
     }
-  } 
+  }
+}
 
 /* =====================================================
    데이터 수집 (구글 시트 열 순서에 맞게)
