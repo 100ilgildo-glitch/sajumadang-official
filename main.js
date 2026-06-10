@@ -472,33 +472,12 @@ function debounce(func, wait) {
 
 /* ── EmailJS 초기화 ── */
 emailjs.init("tl5jPJIoiOMEfjMHj");
-
-/* ── 상수 ── */
-                  
 const GAS_URL    =                  
 "https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec";
  const EJS_SVC    = "service_9oog4dh";
 const EJS_TMPL   = "template_3uwin9a";
 
-/* ── 서비스 가격표 ── */
-const PRICE = {
-  svc_paengSaju:  { "선택안함": 0, "1인": 26600, "2인": 42000 },
-  svc_sinnyeonun: { "선택안함": 0, "1인": 17500, "2인": 26600 },
-  svc_jaemurun:   { "선택안함": 0, "1인": 17500, "2인": 26600 },
-  svc_geongangun: { "선택안함": 0, "1인": 14000, "2인": 21000 },
-  svc_jikeopun:   { "선택안함": 0, "1인": 14000, "2인": 21000 },
-  svc_gunghap:    { "선택안함": 0, "2인": 35000 }
-};
 
-/* ── 서비스 한국어 이름 ── */
-const SVC_LABEL = {
-  svc_paengSaju:  "평생사주",
-  svc_sinnyeonun: "신년운",
-  svc_jaemurun:   "재물운",
-  svc_geongangun: "건강운",
-  svc_jikeopun:   "직업운",
-  svc_gunghap:    "궁합"
-};
 
 
 
