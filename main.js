@@ -624,21 +624,6 @@ document.addEventListener("DOMContentLoaded", function () {
 }
 
 /* =====================================================
-   개인정보 동의 토글
-===================================================== */
-function togglePrivacy() {
-  const el = document.getElementById("privacyDetail");
-  const btn = document.querySelector(".btn-privacy-toggle");
-  if (el.style.display === "none") {
-    el.style.display = "block";
-    btn.textContent = "접기 ▴";
-  } else {
-    el.style.display = "none";
-    btn.textContent = "내용 보기 ▾";
-  }
-}
-
-/* =====================================================
    오류 메시지 표시 / 숨기기
 ===================================================== */
 function showError(msg) {
@@ -707,15 +692,6 @@ function validateForm() {
       return false;
     }
   } 
-
-  /* 6) 개인정보 동의 */
-  if (!document.getElementById("privacyAgree").checked) {
-    showError("개인정보 수집 및 이용에 동의해 주세요.");
-    return false;
-  }
-
-  return true;
-}
 
 /* =====================================================
    데이터 수집 (구글 시트 열 순서에 맞게)
