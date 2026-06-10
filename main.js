@@ -470,21 +470,6 @@ function debounce(func, wait) {
     };
 }
 
-/* =====================================================
-   개인정보 동의 토글
-===================================================== */
-function togglePrivacy() {
-  const el = document.getElementById("privacyDetail");
-  const btn = document.querySelector(".btn-privacy-toggle");
-  if (el.style.display === "none") {
-    el.style.display = "block";
-    btn.textContent = "접기 ▴";
-  } else {
-    el.style.display = "none";
-    btn.textContent = "내용 보기 ▾";
-  }
-}
-
 /* ── EmailJS 초기화 ── */
 emailjs.init("tl5jPJIoiOMEfjMHj");
 
