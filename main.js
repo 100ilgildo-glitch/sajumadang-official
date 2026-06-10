@@ -800,28 +800,5 @@ async function sendToGoogleSheet(data) {
       비고:        data["비고"]      || "없음"
     });
 
-/* =====================================================
-   버튼 상태 토글
-===================================================== */
-function setLoading(isLoading) {
-  const btn = document.getElementById("submitBtn");
-  if (isLoading) {
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> 신청 중...`;
-  } else {
-    btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> 상담 신청하기`;
-  }
-}
 
-/* =====================================================
-   폼 초기화 (다시 신청하기)
-===================================================== */
-function resetForm() {
-  document.getElementById("consultForm").reset();
-  document.getElementById("successMsg").style.display = "none";
-  document.getElementById("consultForm").style.display = "block";
-  calcTotal();
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
 
