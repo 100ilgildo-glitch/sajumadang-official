@@ -262,26 +262,8 @@ function initForm() {
         });
     }
 
-   function calculateTotal() {
-  let total = 0;
-  const parts = [];
-
-  // 선택된 서비스 항목 합산
-  document.querySelectorAll('input[name="services"]:checked').forEach(service => {
-    const price = parseInt(service.dataset.price, 10);
-    total += price;
-    parts.push(service.value);
-  });
-
-  // 결과 표시
-  const totalPriceElement = document.getElementById("totalPrice");
-  totalPriceElement.textContent = "합계 금액: " + total.toLocaleString() + "원";
-
-  // formData에 저장할 경우
-  return {
-    totalPrice: total,
-    services: parts
-  };
+      // Initial calculation
+    calculateTotal();
 }
 
 function collectFormData() {
@@ -385,35 +367,28 @@ function initModal() {
     }
 }
 
-function showSuccessModal(formData, receiptNumber) {
+function showSuccessModal(formData) {
     const modal = document.getElementById('successModal');
     const modalBody = document.getElementById('modalBody');
 
-let html = `
-    <p><strong>접수일:</strong> ${formData.receiptDate}</p>
-    <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
-    <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
-    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
-    <p><strong>신청자 정보 (1인):</strong><br>
-    이름: ${formData.person1.name}<br>
-    성별: ${formData.person1.gender} (남/여)<br>
-    생년월일: ${formData.person1.birthDate}<br>
-    양력/음력: ${formData.person1.birthType}<br>
-    태어난 시간: ${formData.person1.birthTime}<br>
-    비고: ${formData.person1.note || ''}</p>
-`;
-
-if (formData.person2) {
-    html += `
-        <p><strong>신청자 정보 (2인):</strong><br>
-        이름: ${formData.person2.name}<br>
-        성별: ${formData.person2.gender} (남/여)<br>
-        생년월일: ${formData.person2.birthDate}<br>
-        양력/음력: ${formData.person2.birthType}<br>
-        태어난 시간: ${formData.person2.birthTime}<br>
-        비고: ${formData.person2.note || ''}</p>
+    let html = `
+        <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
+        <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+        <p><strong>신청자 정보 (1인):</strong><br>
+        이름: ${formData.person1.name} (${formData.person1.gender})<br>
+        생년월일: ${formData.person1.birthDate} (${formData.person1.birthType})<br>
+        태어난 시간: ${formData.person1.birthTime}</p>
     `;
-}
+
+    if (formData.person2) {
+        html += `
+            <p><strong>신청자 정보 (2인):</strong><br>
+            이름: ${formData.person2.name} (${formData.person2.gender})<br>
+            생년월일: ${formData.person2.birthDate} (${formData.person2.birthType})<br>
+            태어난 시간: ${formData.person2.birthTime}</p>
+        `;
+    }
 
     html += `
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
@@ -423,14 +398,11 @@ if (formData.person2) {
         <p><strong>추가 질문:</strong><br>${formData.additionalQuestions}</p>
         <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
         <p style="color: #8B6F47; font-weight: 600;">
-        <i class="fas fa-info-circle"></i> 현재 상태: 접수 완료<br>
+        <i class="fas fa-info-circle"></i> 다음 단계:<br>
         <small style="font-weight: normal;">
-        신청이 정상적으로 접수되었습니다.<br>
-        접수 번호를 꼭 메모해두세요: ${receiptNumber}<br><br>
-        다음 단계:<br>
         1. 농협 351-1377-7789-03 (문광희)로 ${formData.totalPrice}을 입금해주세요<br>
         2. 입금 후 010-9486-4936으로 연락주시거나 입금자명을 남겨주세요<br>
-        3. 입금 확인 후 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
+        3. 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
         </small>
         </p>
     `;
@@ -469,6 +441,9 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+
+ 
 
 
 
