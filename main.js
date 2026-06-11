@@ -1,4 +1,4 @@
-// ===================================
+ // ===================================
 // 사주마당 - JavaScript
 // ===================================
 
@@ -365,7 +365,9 @@ function initModal() {
             }
         });
     }
-}function collectFormData() {
+}
+
+function collectFormData() {
     // 1. 선택된 서비스들 가져오기 (체크박스 목록)
     const checkedServices = [];
     document.querySelectorAll('input[name="services"]:checked').forEach(cb => {
