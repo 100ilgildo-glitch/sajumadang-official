@@ -367,94 +367,53 @@ function initModal() {
     }
 }
 
-function collectFormData() {
-    // 1. 선택된 서비스들 가져오기 (체크박스 목록)
-    const checkedServices = [];
-    document.querySelectorAll('input[name="services"]:checked').forEach(cb => {
-        checkedServices.push(cb.value);
-    });
-    const servicesText = checkedServices.join(', ');
+function showSuccessModal(formData) {
+    const modal = document.getElementById('successModal');
+    const modalBody = document.getElementById('modalBody');
 
-    // 2. 합계 금액 가져오기
-    const totalPriceEl = document.getElementById('totalPrice');
-    const totalPrice = totalPriceEl ? totalPriceEl.textContent : '0원';
+    let html = `
+        <p><strong>신청 서비스:</strong><br>${formData.services.join('<br>')}</p>
+        <p><strong>합계 금액:</strong> ${formData.totalPrice}</p>
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+        <p><strong>신청자 정보 (1인):</strong><br>
+        이름: ${formData.person1.name} (${formData.person1.gender})<br>
+        생년월일: ${formData.person1.birthDate} (${formData.person1.birthType})<br>
+        태어난 시간: ${formData.person1.birthTime}</p>
+    `;
 
-    // 3. 오늘 날짜 생성 (접수일용)
-    const today = new Date();
-    const receptionDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    // 4. 입력창 데이터 긁어오기
-    const name1 = document.getElementById('name1') ? document.getElementById('name1').value : '';
-    const gender1 = document.getElementById('gender1') ? document.getElementById('gender1').value : '';
-    const birthDate1 = document.getElementById('birth_date1') ? document.getElementById('birth_date1').value : '';
-    const birthTime1 = document.getElementById('birth_time1') ? document.getElementById('birth_time1').value : '';
-    const birthType1 = document.getElementById('birth_type1') ? document.getElementById('birth_type1').value : '';
-
-    const phone = document.getElementById('phone') ? document.getElementById('phone').value : '';
-    const email = document.getElementById('email') ? document.getElementById('email').value : '';
-    const additionalQuestions = document.getElementById('additionalQuestions') ? document.getElementById('additionalQuestions').value : '';
-
-    // [핵심] EmailJS HTML 템플릿의 {{한글이름}}과 100% 일치하도록 주머니를 만듭니다.
-    const data = {
-        to_name: name1,              // {{to_name}}님 반가워요 용
-        접수일: receptionDate,        // {{접수일}}
-        전화번호: phone,             // {{전화번호}}
-        이메일: email,               // {{이메일}}
-        합계금액: totalPrice,          // {{합계금액}}
-        
-        상담신청서1: servicesText,     // {{상담신청서1}}
-        이름1: name1,                // {{이름1}}
-        성별1: gender1,              // {{성별1}}
-        생년월일1: birthDate1,        // {{생년월일1}}
-        양력음력1: birthType1,        // {{양력음력1}}
-        시간1: birthTime1,            // {{시간1}}
-        
-        // 개별 서비스 온/오프 매칭 (혹시 필요할 경우를 대비)
-        평생사주: checkedServices.includes('평생사주') ? '선택함' : '미선택',
-        신년운: checkedServices.includes('2026신년운') ? '선택함' : '미선택',
-        재물운: checkedServices.includes('재물운') ? '선택함' : '미선택',
-        건강운: checkedServices.includes('건강운') ? '선택함' : '미선택',
-        직업운: checkedServices.includes('직업운') ? '선택함' : '미선택',
-        궁합: checkedServices.includes('궁합') ? '선택함' : '미선택',
-        
-        비고: additionalQuestions || '없음', // {{비고}}
-        
-        // 모달창 띄우기용 기존 구조 유지
-        services: checkedServices,
-        totalPrice: totalPrice,
-        person1: { name: name1, gender: gender1, birthDate: birthDate1, birthTime: birthTime1, birthType: birthType1 },
-        contact: { phone: phone, email: email },
-        additionalQuestions: additionalQuestions
-    };
-
-    // 5. 신청인 2 정보가 활성화되어 있다면 추가로 긁어오기
-    const person2Section = document.getElementById('person2Section');
-    if (person2Section && person2Section.style.display !== 'none') {
-        const name2 = document.getElementById('name2') ? document.getElementById('name2').value : '';
-        const gender2 = document.getElementById('gender2') ? document.getElementById('gender2').value : '';
-        const birthDate2 = document.getElementById('birth_date2') ? document.getElementById('birth_date2').value : '';
-        const birthTime2 = document.getElementById('birth_time2') ? document.getElementById('birth_time2').value : '';
-        const birthType2 = document.getElementById('birth_type2') ? document.getElementById('birth_type2').value : '';
-
-        data.상담신청서2 = "상대방 정보 포함", // {{상담신청서2}}
-        data.이름2 = name2,                 // {{이름2}}
-        data.성별2 = gender2,               // {{성별2}}
-        data.생년월일2 = birthDate2,         // {{생년월일2}}
-        data.양력음력2 = birthType2,         // {{양력음력2}}
-        data.시간2 = birthTime2,             // {{시간2}}
-
-        data.person2 = { name: name2, gender: gender2, birthDate: birthDate2, birthTime: birthTime2, birthType: birthType2 };
-    } else {
-        // 2번째 분 정보가 없을 때는 빈칸 처리
-        data.상담신청서2 = '없음';
-        data.이름2 = '-';
-        data.성별2 = '-';
-        data.생년월일2 = '-';
-        data.양력음력2 = '-';
-        data.시간2 = '-';
+    if (formData.person2) {
+        html += `
+            <p><strong>신청자 정보 (2인):</strong><br>
+            이름: ${formData.person2.name} (${formData.person2.gender})<br>
+            생년월일: ${formData.person2.birthDate} (${formData.person2.birthType})<br>
+            태어난 시간: ${formData.person2.birthTime}</p>
+        `;
     }
 
-    return data;
+    html += `
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+        <p><strong>연락처:</strong><br>
+        전화: ${formData.contact.phone}<br>
+        이메일: ${formData.contact.email}</p>
+        <p><strong>추가 질문:</strong><br>${formData.additionalQuestions}</p>
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid #E5E1D8;">
+        <p style="color: #8B6F47; font-weight: 600;">
+        <i class="fas fa-info-circle"></i> 다음 단계:<br>
+        <small style="font-weight: normal;">
+        1. 농협 351-1377-7789-03 (문광희)로 ${formData.totalPrice}을 입금해주세요<br>
+        2. 입금 후 010-9486-4936으로 연락주시거나 입금자명을 남겨주세요<br>
+        3. 24시간 내 ${formData.contact.email}로 PDF 리포트를 발송해드립니다
+        </small>
+        </p>
+    `;
+
+    modalBody.innerHTML = html;
+    modal.classList.add('active');
+}
+
+function closeModal() {
+    const modal = document.getElementById('successModal');
+    modal.classList.remove('active');
 }
 
 // ===================================
