@@ -644,8 +644,5 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
-// ===================================
-// 사주마당 - JavaScript
-// ===================================
 
 
