@@ -1,4 +1,4 @@
- // ===================================
+  // ===================================
 // 사주마당 - JavaScript
 // ===================================
 
@@ -135,6 +135,49 @@ function initForm() {
     // Service radio buttons
     const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
     
+    // ===== 신청인1 드롭다운 =====
+    const yearSelect1 = document.getElementById('birth_year1');
+    if (yearSelect1) {
+        for (let y = new Date().getFullYear(); y >= 1900; y--) {
+            yearSelect1.innerHTML += `<option value="${y}">${y}년</option>`;
+        }
+    }
+
+    const monthSelect1 = document.getElementById('birth_month1');
+    if (monthSelect1) {
+        for (let m = 1; m <= 12; m++) {
+            const value = String(m).padStart(2, '0');
+            monthSelect1.innerHTML += `<option value="${value}">${m}월</option>`;
+        }
+    }
+
+    const daySelect1 = document.getElementById('birth_day1');
+    if (daySelect1) {
+        for (let d = 1; d <= 31; d++) {
+            const value = String(d).padStart(2, '0');
+            daySelect1.innerHTML += `<option value="${value}">${d}일</option>`;
+        }
+    }
+
+    const hourSelect1 = document.getElementById('birth_hour1');
+    if (hourSelect1) {
+        for (let h = 0; h <= 23; h++) {
+            const value = String(h).padStart(2, '0');
+            hourSelect1.innerHTML += `<option value="${value}">${value}시</option>`;
+        }
+    }
+
+    const minuteSelect1 = document.getElementById('birth_minute1');
+    if (minuteSelect1) {
+        for (let m = 0; m <= 59; m++) {
+            const value = String(m).padStart(2, '0');
+            minuteSelect1.innerHTML += `<option value="${value}">${value}분</option>`;
+        }
+    }
+
+    // Calculate total price
+    function calculateTotal() {
+    
     // Calculate total price
     function calculateTotal() {
         let total = 0;
@@ -151,28 +194,104 @@ function initForm() {
             }
         });
 
-        // Show/hide person 2 section
-        if (hasTwoPerson) {
-            person2Section.style.display = 'block';
-            // Make person 2 fields required
-            document.getElementById('name2').required = true;
-            document.getElementById('gender2').required = true;
-            document.getElementById('birth_date2').required = true;
-        } else {
-            person2Section.style.display = 'none';
-            // Make person 2 fields optional
-            document.getElementById('name2').required = false;
-            document.getElementById('gender2').required = false;
-            document.getElementById('birth_date2').required = false;
-        }
+                if (hasTwoPerson) {
 
-        totalPriceElement.textContent = total.toLocaleString('ko-KR') + '원';
+    person2Section.style.display = 'block';
+
+    document.getElementById('name2').required = true;
+    document.getElementById('gender2').required = true;
+
+    document.getElementById('birth_year2').required = true;
+    document.getElementById('birth_month2').required = true;
+    document.getElementById('birth_day2').required = true;
+
+} else {
+
+    person2Section.style.display = 'none';
+
+    document.getElementById('name2').required = false;
+    document.getElementById('gender2').required = false;
+
+    document.getElementById('birth_year2').required = false;
+    document.getElementById('birth_month2').required = false;
+    document.getElementById('birth_day2').required = false;
+}
+
+    totalPriceElement.textContent = total.toLocaleString('ko-KR') + '원';
     }
 
     // Add event listeners to all radio buttons
     serviceRadios.forEach(radio => {
         radio.addEventListener('change', calculateTotal);
     });
+
+    // ===== 신청인2 드롭다운 =====
+
+// 년도
+const yearSelect2 = document.getElementById('birth_year2');
+
+if (yearSelect2) {
+    for (let y = new Date().getFullYear(); y >= 1900; y--) {
+        yearSelect2.innerHTML += `<option value="${y}">${y}년</option>`;
+    }
+}
+
+// 월
+const monthSelect2 = document.getElementById('birth_month2');
+
+if (monthSelect2) {
+    for (let m = 1; m <= 12; m++) {
+        const value = String(m).padStart(2, '0');
+        monthSelect2.innerHTML += `<option value="${value}">${m}월</option>`;
+    }
+}
+
+// 일
+const daySelect2 = document.getElementById('birth_day2');
+
+if (daySelect2) {
+    for (let d = 1; d <= 31; d++) {
+        const value = String(d).padStart(2, '0');
+        daySelect2.innerHTML += `<option value="${value}">${d}일</option>`;
+    }
+}
+
+// 시
+const hourSelect2 = document.getElementById('birth_hour2');
+
+if (hourSelect2) {
+    for (let h = 0; h <= 23; h++) {
+        const value = String(h).padStart(2, '0');
+        hourSelect2.innerHTML += `<option value="${value}">${value}시</option>`;
+    }
+}
+
+// 분
+const minuteSelect2 = document.getElementById('birth_minute2');
+
+if (minuteSelect2) {
+    for (let m = 0; m <= 59; m++) {
+        const value = String(m).padStart(2, '0');
+        minuteSelect2.innerHTML += `<option value="${value}">${value}분</option>`;
+    }
+}
+
+const birthHour2 = document.getElementById('birth_hour2');
+const birthMinute2 = document.getElementById('birth_minute2');
+const timeUnknown2 = document.getElementById('time_unknown2');
+
+if (timeUnknown2 && birthHour2 && birthMinute2) {
+    timeUnknown2.addEventListener('change', function() {
+
+        birthHour2.disabled = this.checked;
+        birthMinute2.disabled = this.checked;
+
+        if (this.checked) {
+            birthHour2.value = '';
+            birthMinute2.value = '';
+        }
+    });
+}
 
     // Also add listeners to "none" options
     document.querySelectorAll('input[type="radio"][value="none"]').forEach(radio => {
@@ -194,31 +313,27 @@ function initForm() {
             }
         });
     }
+}
 
     // Time unknown checkboxes
+    const birthHour1 = document.getElementById('birth_hour1');
+    const birthMinute1 = document.getElementById('birth_minute1');
     const timeUnknown1 = document.getElementById('time_unknown1');
-    const birthTime1 = document.getElementById('birth_time1');
-    const timeUnknown2 = document.getElementById('time_unknown2');
-    const birthTime2 = document.getElementById('birth_time2');
 
-    if (timeUnknown1 && birthTime1) {
+    if (timeUnknown1 && birthHour1 && birthMinute1) {
         timeUnknown1.addEventListener('change', function() {
-            birthTime1.disabled = this.checked;
-            if (this.checked) {
-                birthTime1.value = '';
-            }
-        });
-    }
 
-    if (timeUnknown2 && birthTime2) {
-        timeUnknown2.addEventListener('change', function() {
-            birthTime2.disabled = this.checked;
-            if (this.checked) {
-                birthTime2.value = '';
-            }
-        });
-    }
+        birthHour1.disabled = this.checked;
+        birthMinute1.disabled = this.checked;
 
+        if (this.checked) {
+            birthHour1.value = '';
+            birthMinute1.value = '';
+        }
+    });
+
+}
+   
     // Form submission
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -252,6 +367,17 @@ function initForm() {
 
             // Collect form data
             const formData = collectFormData();
+            fetch("https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec", {
+    method: "POST",
+    body: JSON.stringify(formData)
+})
+.then(response => response.json())
+.then(data => {
+    console.log("Google Sheets 저장 성공", data);
+})
+.catch(error => {
+    console.error("Google Sheets 저장 실패", error);
+});
             
             // Show success modal
             showSuccessModal(formData);
@@ -267,22 +393,59 @@ function initForm() {
 }
 
 function collectFormData() {
+    fetch("https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec", {
+    method: "POST",
+    body: JSON.stringify(formData)
+})
+.then(response => response.json())
+.then(data => {
+    console.log("Google Sheets 저장 성공", data);
+})
+.catch(error => {
+    console.error("Google Sheets 저장 실패", error);
+});
+
     const data = {
         services: [],
         totalPrice: document.getElementById('totalPrice').textContent,
         person1: {
-            name: document.getElementById('name1').value,
-            gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date1').value,
-            birthTime: document.getElementById('time_unknown1').checked ? '시간 미상' : (document.getElementById('birth_time1').value || '미입력')
-        },
-        contact: {
-            phone: document.getElementById('phone').value,
-            email: document.getElementById('email').value
-        },
-        additionalQuestions: document.getElementById('additional_questions').value || '없음'
+    name: document.getElementById('name1').value,
+    gender: document.getElementById('gender1').value === 'male' ? '남성' : '여성',
+    birthType: document.getElementById('birth_type1').value === 'solar' ? '양력' : '음력',
+
+    
+    birthDate:
+        document.getElementById('birth_year1').value + '-' +
+        document.getElementById('birth_month1').value + '-' +
+        document.getElementById('birth_day1').value,
+
+    birthTime:
+        document.getElementById('time_unknown1').checked
+            ? '시간 미상'
+            : (
+                document.getElementById('birth_hour1').value &&
+                document.getElementById('birth_minute1').value
+              )
+                ? document.getElementById('birth_hour1').value + ':' +
+                  document.getElementById('birth_minute1').value
+                : '미입력'
+            }
     };
+    return data;
+}
+
+    if (timeUnknown1 && birthHour1 && birthMinute1) {
+    timeUnknown1.addEventListener('change', function () {
+
+        birthHour1.disabled = this.checked;
+        birthMinute1.disabled = this.checked;
+
+        if (this.checked) {
+            birthHour1.value = '';
+            birthMinute1.value = '';
+        }
+    });
+}
 
     // Collect selected services
     const serviceMapping = {
@@ -301,20 +464,59 @@ function collectFormData() {
             data.services.push(`${serviceMapping[key]} (${personCount})`);
         }
     });
-
+ 
     // Check if person 2 section is visible
     if (document.getElementById('person2Section').style.display === 'block') {
-        data.person2 = {
-            name: document.getElementById('name2').value,
-            gender: document.getElementById('gender2').value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type2').value === 'solar' ? '양력' : '음력',
-            birthDate: document.getElementById('birth_date2').value,
-            birthTime: document.getElementById('time_unknown2').checked ? '시간 미상' : (document.getElementById('birth_time2').value || '미입력')
-        };
-    }
 
-    return data;
+    data.
+    person2 = {
+        name: document.getElementById('name2').value,
+
+        gender:
+            document.getElementById('gender2').value === 'male'
+                ? '남성'
+                : '여성',
+
+        birthType:
+            document.getElementById('birth_type2').value === 'solar'
+                ? '양력'
+                : '음력',
+
+        birthDate:
+            document.getElementById('birth_year2').value + '-' +
+            document.getElementById('birth_month2').value + '-' +
+            document.getElementById('birth_day2').value,
+
+        birthTime:
+            document.getElementById('time_unknown2').checked
+                ? '시간 미상'
+                : (
+                    document.getElementById('birth_hour2').value &&
+                    document.getElementById('birth_minute2').value
+                  )
+                    ? document.getElementById('birth_hour2').value + ':' +
+                      document.getElementById('birth_minute2').value
+                    : '미입력'
+    };
 }
+
+    const timeUnknown2 = document.getElementById('time_unknown2');
+    const birthHour2 = document.getElementById('birth_hour2');
+    const birthMinute2 = document.getElementById('birth_minute2');
+
+    if (timeUnknown2 && birthHour2 && birthMinute2) {
+        timeUnknown2.addEventListener('change', function () {
+
+        birthHour2.disabled = this.checked;
+        birthMinute2.disabled = this.checked;
+
+        if (this.checked) {
+            birthHour2.value = '';
+            birthMinute2.value = '';
+        }
+    });
+}
+    
 
 // ===================================
 // FAQ Accordion
@@ -407,6 +609,7 @@ function showSuccessModal(formData) {
         </p>
     `;
 
+
     modalBody.innerHTML = html;
     modal.classList.add('active');
 }
@@ -418,8 +621,8 @@ function closeModal() {
 
 // ===================================
 // Utility Functions
-// ===================================
-
+// ==================================
+ 
 // Format date to Korean format
 function formatDate(dateString) {
     const date = new Date(dateString);
@@ -441,4 +644,8 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+// ===================================
+// 사주마당 - JavaScript
+// ===================================
+
 
