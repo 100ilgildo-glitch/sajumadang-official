@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 
+<!DOCTYPE html>
+<html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -68,16 +71,16 @@
                         <i class="fas fa-edit"></i> 동영상
                     </a>
 
-                <div class="hero-buttons animate-fade-in-delay-2">
-                    <a href="#application" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> 상담 신청하기
-                    </a>
-                    <a href="#services" class="btn btn-secondary">
-                        <i class="fas fa-info-circle"></i> 서비스 보기
-                    </a>
+                    <div class="hero-buttons animate-fade-in-delay-2">
+                        <a href="#application" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> 상담 신청하기
+                        </a>
+                        <a href="#services" class="btn btn-secondary">
+                            <i class="fas fa-info-circle"></i> 서비스 보기
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <!-- Services Section -->
@@ -532,15 +535,37 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="birth_date1">생년월일 *</label>
-                            <input type="date" id="birth_date1" name="birth_date1" required>
+                            <label>생년월일 *</label>
+                        
+                            <div style="display:flex; gap:8px;">
+                                <select id="birth_year1" required>
+                                    <option value="">년도</option>
+                                </select>
+                        
+                                <select id="birth_month1" required>
+                                    <option value="">월</option>
+                                </select>
+                        
+                                <select id="birth_day1" required>
+                                    <option value="">일</option>
+                                </select>
+                            </div>
                         </div>
-
+                        
                         <div class="form-group">
-                            <label for="birth_time1">태어난 시간</label>
-                            <input type="time" id="birth_time1" name="birth_time1" placeholder="예: 14:30">
+                            <label>태어난 시간</label>
+                        
+                            <div style="display:flex; gap:8px;">
+                                <select id="birth_hour1">
+                                    <option value="">시</option>
+                                </select>
+                        
+                                <select id="birth_minute1">
+                                    <option value="">분</option>
+                                </select>
+                            </div>
                         </div>
-
+                        
                         <div class="form-group checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="time_unknown1" name="time_unknown1">
@@ -549,7 +574,7 @@
                         </div>
                     </div>
                 </div>
-
+                    
                 <!-- 2인 정보 (조건부 표시) -->
                 <div class="form-section" id="person2Section" style="display: none;">
                     <h3 class="form-section-title">
@@ -580,15 +605,37 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="birth_date2">생년월일 *</label>
-                            <input type="date" id="birth_date2" name="birth_date2">
+                            <label>생년월일 *</label>
+                        
+                            <div style="display:flex; gap:8px;">
+                                <select id="birth_year2" required>
+                                    <option value="">년도</option>
+                                </select>
+                        
+                                <select id="birth_month2" required>
+                                    <option value="">월</option>
+                                </select>
+                        
+                                <select id="birth_day2" required>
+                                    <option value="">일</option>
+                                </select>
+                            </div>
                         </div>
-
+                        
                         <div class="form-group">
-                            <label for="birth_time2">태어난 시간</label>
-                            <input type="time" id="birth_time2" name="birth_time2" placeholder="예: 09:15">
+                            <label>태어난 시간</label>
+                        
+                            <div style="display:flex; gap:8px;">
+                                <select id="birth_hour2">
+                                    <option value="">시</option>
+                                </select>
+                        
+                                <select id="birth_minute2">
+                                    <option value="">분</option>
+                                </select>
+                            </div>
                         </div>
-
+                        
                         <div class="form-group checkbox-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" id="time_unknown2" name="time_unknown2">
@@ -647,22 +694,23 @@
                     <h3 class="form-section-title">
                         <i class="fas fa-shield-halved"></i> 개인정보 수집 및 이용 동의
                     </h3>
-                
-                    <div class="privacy-box" style="max-height:200px; overflow-y:auto; border:3px solid #ccc; padding:10px;">
+
+                    <div class="privacy-box"
+                        style="max-height:200px; overflow-y:auto; border:3px solid #ccc; padding:10px;">
                         <strong>개인정보 수집 및 이용 동의서</strong><br><br>
                         1. 상담신청서 작성 시 - 이름, 생년월일시, 성별, 연락처(전화번호, 이메일) 등은 사주상담 특성상 필요정보 자료로 상담의뢰인 동의로 간주합니다.<br><br>
                         2. 수집된 고객님의 소중한 정보는 상담 목적 외에는 사용하지 않으며, 상담 목적 달성 후 즉시 파기됩니다.<br><br>
                         3. 개인정보 수집 및 이용에 동의하셔야 상담신청서 제출이 가능합니다. 동의하지 않을 경우 상담신청이 제한됩니다.
                     </div>
                 </div>
-                
+
                 <div class="privacy-agree-container">
                     <label class="privacy-agree-label">
                         <input type="checkbox" id="privacyAgree" name="privacy_agreement" required>
                         <span>위 개인정보 수집 및 이용에 동의합니다.</span>
                     </label>
                 </div>
-            
+
                 <!-- 제출 버튼 -->
                 <div class="form-actions">
                     <button type="submit" id="submitBtn" class="btn btn-primary btn-large" disabled>
@@ -827,7 +875,6 @@
     </button>
 
     <!-- Floating KakaoTalk Button -->
-    "https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js
     <a href="https://pf.kakao.com/_MgnDn/chat" target="_blank" rel="noopener noreferrer" class="kakao-floating-btn"
         aria-label="카카오톡 상담">
         <i class="fab fa-kickstarter-k"></i>
@@ -850,52 +897,50 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // EmailJS 초기화
-        emailjs.init("tl5jPJIoiOMEfjMHj");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // EmailJS 초기화
+            emailjs.init("tl5jPJIoiOMEfjMHj");
 
-        // 폼과 버튼 찾기 (아이디가 달라도 알아서 찾아오도록 보완)
-        let form = document.getElementById("emailForm") || document.querySelector("form");
-        let submitBtn = document.getElementById("submitBtn") || document.querySelector("button[type='submit']");
+            // 폼과 버튼 찾기 (아이디가 달라도 알아서 찾아오도록 보완)
+            let form = document.getElementById("emailForm") || document.querySelector("form");
+            let submitBtn = document.getElementById("submitBtn") || document.querySelector("button[type='submit']");
 
-        // [핵심] 잠겨있는 버튼을 강제로 풀어줍니다. (이제 클릭이 됩니다!)
-        if (submitBtn) {
-            submitBtn.disabled = false; 
-        }
+            // [핵심] 잠겨있는 버튼을 강제로 풀어줍니다. (이제 클릭이 됩니다!)
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
 
-        if (!form) {
-            console.error("신청서 폼(form) 태그를 찾을 수 없습니다.");
-            return;
-        }
+            if (!form) {
+                console.error("신청서 폼(form) 태그를 찾을 수 없습니다.");
+                return;
+            }
 
-        // 제출 버튼 클릭 시 실행
-        form.addEventListener("submit", function (event) {
-            event.preventDefault(); // 새로고침 방지
+            // 제출 버튼 클릭 시 실행
+            form.addEventListener("submit", function (event) {
+                event.preventDefault(); // 새로고침 방지
 
-            if (submitBtn) submitBtn.disabled = true; // 중복 발송 방지
+                if (submitBtn) submitBtn.disabled = true; // 중복 발송 방지
 
-            // EmailJS로 메일 전송
-            emailjs.sendForm("service_9oog4dh", "template_3uwin9a", form)
-                .then(function () {
-                    alert("상담 신청이 정상적으로 접수되었습니다.");
-                    form.reset();
-                    if (submitBtn) submitBtn.disabled = false;
-                })
-                .catch(function (error) {
-                    console.error("EmailJS 전송 에러:", error);
-                    alert("이메일 전송 실패: " + (error.text || JSON.stringify(error)));
-                    if (submitBtn) submitBtn.disabled = false;
-                });
+                // EmailJS로 메일 전송
+                emailjs.sendForm("service_9oog4dh", "template_3uwin9a", form)
+                    .then(function () {
+                        alert("상담 신청이 정상적으로 접수되었습니다.");
+                        form.reset();
+                        if (submitBtn) submitBtn.disabled = false;
+                    })
+                    .catch(function (error) {
+                        console.error("EmailJS 전송 에러:", error);
+                        alert("이메일 전송 실패: " + (error.text || JSON.stringify(error)));
+                        if (submitBtn) submitBtn.disabled = false;
+                    });
+            });
         });
-    });
-</script>
+    </script>
 
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script src="main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="main.js"></script>
+
 </body>
 </html>
-
- 
-
             
