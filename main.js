@@ -1,4 +1,4 @@
-  // ===================================
+ // ===================================
 // 사주마당 - JavaScript
 // ===================================
 
@@ -175,9 +175,6 @@ function initForm() {
         }
     }
 
-    // Calculate total price
-    function calculateTotal() {
-    
     // Calculate total price
     function calculateTotal() {
         let total = 0;
@@ -367,7 +364,8 @@ if (timeUnknown2 && birthHour2 && birthMinute2) {
 
             // Collect form data
             const formData = collectFormData();
-            fetch("https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec", {
+            console.log(formData);
+            fetch("https://script.google.com/macros/s/AKfycbxSM3QDNkY1iCHOreFvlHxt6WvaFZJwcTx0WlpHGB5m3G05uv9_GcZHopMK9W3mz__N/exec", {
     method: "POST",
     body: JSON.stringify(formData)
 })
@@ -390,21 +388,9 @@ if (timeUnknown2 && birthHour2 && birthMinute2) {
 
     // Initial calculation
     calculateTotal();
-}
+
 
 function collectFormData() {
-    fetch("https://script.google.com/macros/s/AKfycbzfn8qtTGi8Jb2-audDE8povF58l1843C6jCgw1PHS9Hg-swK2bXcaH_RsEbGXi_BRb/exec", {
-    method: "POST",
-    body: JSON.stringify(formData)
-})
-.then(response => response.json())
-.then(data => {
-    console.log("Google Sheets 저장 성공", data);
-})
-.catch(error => {
-    console.error("Google Sheets 저장 실패", error);
-});
-
     const data = {
         services: [],
         totalPrice: document.getElementById('totalPrice').textContent,
@@ -644,5 +630,3 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
-
-
