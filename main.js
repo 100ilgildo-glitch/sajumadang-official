@@ -310,7 +310,6 @@ if (timeUnknown2 && birthHour2 && birthMinute2) {
             }
         });
     }
-}
 
     // Time unknown checkboxes
     const birthHour1 = document.getElementById('birth_hour1');
