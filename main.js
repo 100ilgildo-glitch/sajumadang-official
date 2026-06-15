@@ -116,16 +116,15 @@ function initForm() {
     const person2Section = document.getElementById('person2Section');
     const serviceRadios = document.querySelectorAll('input[type="radio"][data-price]');
     
-    // 드롭다운 생성 함수
     function fillSelect(elementId, start, end, suffix, pad) {
         const el = document.getElementById(elementId);
         if (!el) return;
         let html = '';
-        if (start > end) { // 년도 역순
+        if (start > end) {
             for (let i = start; i >= end; i--) {
                 html += `<option value="${i}">${i}${suffix}</option>`;
             }
-        } else { // 월, 일, 시, 분
+        } else {
             for (let i = start; i <= end; i++) {
                 const val = pad ? String(i).padStart(2, '0') : String(i);
                 html += `<option value="${val}">${i}${suffix}</option>`;
@@ -134,28 +133,26 @@ function initForm() {
         el.innerHTML += html;
     }
 
-    // 신청인1 드롭다운 채우기
     fillSelect('birth_year1', new Date().getFullYear(), 1900, '년', false);
     fillSelect('birth_month1', 1, 12, '월', true);
     fillSelect('birth_day1', 1, 31, '일', true);
     fillSelect('birth_hour1', 0, 23, '시', true);
     fillSelect('birth_minute1', 0, 59, '분', true);
 
-    // 신청인2 드롭다운 채우기
     fillSelect('birth_year2', new Date().getFullYear(), 1900, '년', false);
     fillSelect('birth_month2', 1, 12, '월', true);
     fillSelect('birth_day2', 1, 31, '일', true);
     fillSelect('birth_hour2', 0, 23, '시', true);
     fillSelect('birth_minute2', 0, 59, '분', true);
 
-    // 금액 계산 함수
+    // 📱 모바일에서도 완벽하게 금액을 계산해 주는 함수
     function calculateTotal() {
         let total = 0;
         let hasTwoPerson = false;
 
         serviceRadios.forEach(radio => {
             if (radio.checked && radio.value !== 'none') {
-                total += parseInt(radio.dataset.price || '0');
+                total += parseInt(radio.getAttribute('data-price') || '0');
                 if (radio.value === '2') hasTwoPerson = true;
             }
         });
@@ -181,11 +178,9 @@ function initForm() {
         }
     }
 
-    // 라디오 버튼 이벤트 바인딩
     serviceRadios.forEach(radio => radio.addEventListener('change', calculateTotal));
     document.querySelectorAll('input[type="radio"][value="none"]').forEach(radio => radio.addEventListener('change', calculateTotal));
 
-    // 시간미상 체크박스 제어 함수
     function setupTimeUnknown(chkId, hourId, minId) {
         const chk = document.getElementById(chkId);
         const hour = document.getElementById(hourId);
@@ -201,7 +196,6 @@ function initForm() {
     setupTimeUnknown('time_unknown1', 'birth_hour1', 'birth_minute1');
     setupTimeUnknown('time_unknown2', 'birth_hour2', 'birth_minute2');
 
-    // 전화번호 포맷팅
     const phoneInput = document.getElementById('phone');
     if (phoneInput) {
         phoneInput.addEventListener('input', function(e) {
@@ -212,7 +206,6 @@ function initForm() {
         });
     }
 
-    // 신청 버튼 클릭 시 (제출)
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -226,34 +219,41 @@ function initForm() {
             const phoneValue = document.getElementById('phone').value;
             if (!/^\d{3}-\d{4}-\d{4}$/.test(phoneValue)) { alert('올바른 전화번호 형식을 입력해주세요.'); return; }
 
-            // 데이터 수집
             const formData = collectFormData();
+            const nowStr = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
             
-            // 구글 시트용 평면 데이터 조립
-            const finalSheetData = {
-                접수일: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-                상담신청서1: formData.services.join(', '),
-                이름1: formData.person1.name,
-                성별1: formData.person1.gender,
-                생년월일1: formData.person1.birthDate,
-                시간1: formData.person1.birthTime,
-                양력음력1: formData.person1.birthType,
-                상담신청서2: formData.person2 ? formData.services.join(', ') : '',
-                이름2: formData.person2 ? formData.person2.name : '',
-                성별2: formData.person2 ? formData.person2.gender : '',
-                생년월일2: formData.person2 ? formData.person2.birthDate : '',
-                시간2: formData.person2 ? formData.person2.birthTime : '',
-                양력음력2: formData.person2 ? formData.person2.birthType : '',
-                합계금액: formData.totalPrice,
-                전화번호: formData.contact.phone,
-                이메일: formData.contact.email,
-                비고: formData.additionalQuestions
+            const finalPayload = {
+                "접수일": nowStr,
+                "상담신청서1": formData.services1.join(', '),
+                "이름1": formData.person1.name,
+                "성별1": formData.person1.gender,
+                "생년월일1": formData.person1.birthDate,
+                "시간1": formData.person1.birthTime,
+                "양력음력1": formData.person1.birthType,
+                "상담신청서2": formData.person2 ? formData.services2.join(', ') : '',
+                "이름2": formData.person2 ? formData.person2.name : '',
+                "성별2": formData.person2 ? formData.person2.gender : '',
+                "생년월일2": formData.person2 ? formData.person2.birthDate : '',
+                "시간2": formData.person2 ? formData.person2.birthTime : '',
+                "양력음력2": formData.person2 ? formData.person2.birthType : '',
+                "합계금액": formData.totalPrice,
+                "전화번호": formData.contact.phone,
+                "이메일": formData.contact.email,
+                "비고": formData.additionalQuestions,
+
+                "to_name": formData.person1.name,
+                "접수일시": nowStr,
+                "평생사주": formData.emailServices["평생사주"],
+                "신년운": formData.emailServices["2026년 신년운"],
+                "재물운": formData.emailServices["재물운"],
+                "건강운": formData.emailServices["건강운"],
+                "직업운": formData.emailServices["직업운"],
+                "궁합": formData.emailServices["궁합"]
             };
 
-            // 구글 전송
-            fetch(https://script.google.com/macros/s/AKfycbyfL1iG4TCVK2JVH653kObB_t4Ixu7y8WYW2QyNQrkmvd6xKPUkC4-BGUCWS8OPQ3SI/exec"", {
+            fetch("https://script.google.com/macros/s/AKfycbxSM3QDNkY1iCHOreFvlHxt6WvaFZJwcTx0WlpHGB5m3G05uv9_GcZHopMK9W3mz__N/exec", {
                 method: "POST",
-                body: JSON.stringify(finalSheetData)
+                body: JSON.stringify(finalPayload)
             })
             .then(res => res.json())
             .then(data => console.log("✅ 구글 시트 저장 완료:", data))
@@ -267,28 +267,42 @@ function initForm() {
     calculateTotal();
 }
 
-// 데이터 수집 서브 함수
+// 📱 모바일 기기(아이폰 사파리 등)에서 생년월일시분 데이터를 완벽하게 긁어오는 안전한 기능
 function collectFormData() {
     const commentsEl = document.getElementById('comments') || document.getElementById('additional_questions');
+    
+    function getValue(id) {
+        const el = document.getElementById(id);
+        return el ? el.value : '';
+    }
+    
+    function getChecked(id) {
+        const el = document.getElementById(id);
+        return el ? el.checked : false;
+    }
+
+    const priceEl = document.getElementById('totalPrice');
+    const totalPriceText = priceEl ? priceEl.textContent : '0원';
+
     const data = {
-        services: [],
-        totalPrice: document.getElementById('totalPrice')?.textContent || '0원',
+        services1: [],
+        services2: [],
+        totalPrice: totalPriceText,
+        emailServices: { "평생사주": "", "2026년 신년운": "", "재물운": "", "건강운": "", "직업운": "", "궁합": "" },
         person1: {
-            name: document.getElementById('name1')?.value || '',
-            gender: document.getElementById('gender1')?.value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type1')?.value === 'solar' ? '양력' : '음력',
-            birthDate: (document.getElementById('birth_year1')?.value || '') + '년 ' +
-                       (document.getElementById('birth_month1')?.value || '') + '월 ' +
-                       (document.getElementById('birth_day1')?.value || '') + '일',
-            birthTime: document.getElementById('time_unknown1')?.checked
+            name: getValue('name1'),
+            gender: getValue('gender1') === 'male' ? '남성' : '여성',
+            birthType: getValue('birth_type1') === 'solar' ? '양력' : '음력',
+            birthDate: getValue('birth_year1') + '년 ' + getValue('birth_month1') + '월 ' + getValue('birth_day1') + '일',
+            birthTime: getChecked('time_unknown1')
                 ? '시간 미상'
-                : (document.getElementById('birth_hour1')?.value && document.getElementById('birth_minute1')?.value)
-                    ? document.getElementById('birth_hour1').value + '시 ' + document.getElementById('birth_minute1').value + '분'
+                : (getValue('birth_hour1') && getValue('birth_minute1'))
+                    ? getValue('birth_hour1') + '시 ' + getValue('birth_minute1') + '분'
                     : '미입력'
         },
         contact: {
-            phone: document.getElementById('phone')?.value || '',
-            email: document.getElementById('email')?.value || ''
+            phone: getValue('phone'),
+            email: getValue('email')
         },
         additionalQuestions: commentsEl ? commentsEl.value : ''
     };
@@ -305,24 +319,29 @@ function collectFormData() {
     Object.keys(serviceMapping).forEach(key => {
         const selected = document.querySelector(`input[name="${key}"]:checked`);
         if (selected && selected.value !== 'none') {
-            const count = selected.value === '2' ? '2인' : '1인';
-            data.services.push(`${serviceMapping[key]} (${count})`);
+            const label = serviceMapping[key];
+            if (selected.value === '1') {
+                data.services1.push(`${label} (1인)`);
+                data.emailServices[label] = "1인 신청";
+            } else if (selected.value === '2') {
+                data.services1.push(`${label} (2인)`);
+                data.services2.push(`${label} (2인)`);
+                data.emailServices[label] = "2인 신청";
+            }
         }
     });
 
     const p2Sect = document.getElementById('person2Section');
     if (p2Sect && p2Sect.style.display === 'block') {
         data.person2 = {
-            name: document.getElementById('name2')?.value || '',
-            gender: document.getElementById('gender2')?.value === 'male' ? '남성' : '여성',
-            birthType: document.getElementById('birth_type2')?.value === 'solar' ? '양력' : '음력',
-            birthDate: (document.getElementById('birth_year2')?.value || '') + '년 ' +
-                       (document.getElementById('birth_month2')?.value || '') + '월 ' +
-                       (document.getElementById('birth_day2')?.value || '') + '일',
-            birthTime: document.getElementById('time_unknown2')?.checked
+            name: getValue('name2'),
+            gender: getValue('gender2') === 'male' ? '남성' : '여성',
+            birthType: getValue('birth_type2') === 'solar' ? '양력' : '음력',
+            birthDate: getValue('birth_year2') + '년 ' + getValue('birth_month2') + '월 ' + getValue('birth_day2') + '일',
+            birthTime: getChecked('time_unknown2')
                 ? '시간 미상'
-                : (document.getElementById('birth_hour2')?.value && document.getElementById('birth_minute2')?.value)
-                    ? document.getElementById('birth_hour2').value + '시 ' + document.getElementById('birth_minute2').value + '분'
+                : (getValue('birth_hour2') && getValue('birth_minute2'))
+                    ? getValue('birth_hour2') + '시 ' + getValue('birth_minute2') + '분'
                     : '미입력'
         };
     }
