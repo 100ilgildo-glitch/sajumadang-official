@@ -251,7 +251,7 @@ function initForm() {
             };
 
             // 구글 전송
-            fetch("https://script.google.com/macros/s/AKfycbxSM3QDNkY1iCHOreFvlHxt6WvaFZJwcTx0WlpHGB5m3G05uv9_GcZHopMK9W3mz__N/exec", {
+            fetch(https://script.google.com/macros/s/AKfycbyfL1iG4TCVK2JVH653kObB_t4Ixu7y8WYW2QyNQrkmvd6xKPUkC4-BGUCWS8OPQ3SI/exec"", {
                 method: "POST",
                 body: JSON.stringify(finalSheetData)
             })
